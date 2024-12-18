@@ -1,4 +1,4 @@
-# facecheck_uanl
+# FaceCheck UANL App
 
 A new Flutter project.
 
