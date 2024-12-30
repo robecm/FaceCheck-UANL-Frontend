@@ -22,6 +22,7 @@ class MyApp extends StatelessWidget {
         '/login_selection': (context) => LoginSelectionScreen(),
         '/student_login': (context) => StudentLoginScreen(),
         '/teacher_login': (context) => TeacherLoginScreen(),
+        '/home': (context) => HomeScreen(),
       },
     );
   }

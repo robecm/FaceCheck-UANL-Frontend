@@ -19,6 +19,7 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
       // TODO Login logic
       print('Email: $_email, Password: $_password');
 
+
       Navigator.pushReplacementNamed(context, '/home');
     }
   }
@@ -26,6 +27,10 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(),
+        title: Text('Iniciar sesión'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Center(
