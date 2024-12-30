@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_selection.dart';
-import 'login_screen.dart';
+import 'student_login_screen.dart';
+import 'teacher_login_screen.dart';
 
 void main() {
 
@@ -16,11 +17,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
-      // TODO Routes
       routes: {
         '/': (context) => SplashScreen(),
         '/login_selection': (context) => LoginSelectionScreen(),
-        '/login': (context) => LoginScreen(),
+        '/student_login': (context) => StudentLoginScreen(),
+        '/teacher_login': (context) => TeacherLoginScreen(),
       },
     );
   }
