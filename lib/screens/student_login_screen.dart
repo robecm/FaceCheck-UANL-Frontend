@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+import '../models/login_response.dart';
 
 class StudentLoginScreen extends StatefulWidget {
   const StudentLoginScreen({super.key});
@@ -9,18 +11,49 @@ class StudentLoginScreen extends StatefulWidget {
 
 class StudentLoginScreenState extends State<StudentLoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _email = '';
+  final ApiService apiService = ApiService();
+  bool isLoading = false;
+
+  String _matnum = '';
   String _password = '';
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // TODO Login logic
-      print('Email: $_email, Password: $_password');
+      setState(() {
+        isLoading = true;
+      });
 
+      try {
+        LoginResponse response = await apiService.login(_matnum, _password);
 
-      Navigator.pushReplacementNamed(context, '/home');
+        setState(() {
+          isLoading = false;
+        });
+
+        if (response.success) {
+          // Navigate to home if login is successful
+          Navigator.pushReplacementNamed(context, '/home');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.message ?? 'Inicio de sesión exitoso')),
+          );
+        } else {
+          // Show error message if login fails
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.error ?? 'Credenciales incorrectas')),
+          );
+        }
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+
+        // Show error if API call fails
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al conectar con el servidor: $e')),
+        );
+      }
     }
   }
 
@@ -46,19 +79,19 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
                   ),
                   SizedBox(height: 40),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Correo electrónico'),
-                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(labelText: 'Matrícula'),
+                    keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Introduce tu correo';
+                        return 'Introduce tu matrícula';
                       }
-                      if (!value.contains('@')) {
-                        return 'Introduce un correo válido';
+                      if (value.length != 7 || int.tryParse(value) == null) {
+                        return 'Introduce una matrícula válida de 7 dígitos';
                       }
                       return null;
                     },
                     onSaved: (value) {
-                      _email = value!;
+                      _matnum = value!;
                     },
                   ),
                   SizedBox(height: 20),
@@ -79,7 +112,9 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
                     },
                   ),
                   SizedBox(height: 40),
-                  ElevatedButton(
+                  isLoading
+                      ? CircularProgressIndicator()
+                      : ElevatedButton(
                     onPressed: _submit,
                     child: Text('Iniciar sesión'),
                   ),
@@ -90,11 +125,11 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
                     child: Text('¿No tienes cuenta? Regístrate'),
                   ),
                 ],
-              )
+              ),
             ),
           ),
         ),
-      )
+      ),
     );
   }
 }

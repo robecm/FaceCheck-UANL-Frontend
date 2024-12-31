@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_selection.dart';
-import 'student_login_screen.dart';
-import 'teacher_login_screen.dart';
+import 'screens/student_login_screen.dart';
+import 'screens/teacher_login_screen.dart';
 
 void main() {
 
