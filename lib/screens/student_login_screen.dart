@@ -1,3 +1,4 @@
+// lib/screens/student_login_screen.dart
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../models/login_response.dart';
@@ -17,7 +18,7 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
   String _matnum = '';
   String _password = '';
 
-  void _submit() async {
+  void _submit(String loginType) async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
@@ -26,20 +27,23 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
       });
 
       try {
-        LoginResponse response = await apiService.login(_matnum, _password);
+        LoginResponse response;
+        if (loginType == 'student') {
+          response = await apiService.studentLogin(_matnum, _password);
+        } else {
+          response = await apiService.teacherLogin(_matnum, _password);
+        }
 
         setState(() {
           isLoading = false;
         });
 
         if (response.success) {
-          // Navigate to home if login is successful
           Navigator.pushReplacementNamed(context, '/home');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(response.message ?? 'Inicio de sesión exitoso')),
           );
         } else {
-          // Show error message if login fails
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(response.error ?? 'Credenciales incorrectas')),
           );
@@ -49,7 +53,7 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
           isLoading = false;
         });
 
-        // Show error if API call fails
+        print('Error: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al conectar con el servidor: $e')),
         );
@@ -115,9 +119,9 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
                   isLoading
                       ? CircularProgressIndicator()
                       : ElevatedButton(
-                    onPressed: _submit,
-                    child: Text('Iniciar sesión'),
-                  ),
+                          onPressed: () => _submit('student'),
+                          child: Text('Iniciar sesión'),
+                        ),
                   TextButton(
                     onPressed: () {
                       // TODO Register or recover pwd

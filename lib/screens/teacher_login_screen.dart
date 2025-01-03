@@ -1,4 +1,7 @@
+// lib/screens/teacher_login_screen.dart
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+import '../models/login_response.dart';
 
 class TeacherLoginScreen extends StatefulWidget {
   const TeacherLoginScreen({super.key});
@@ -9,17 +12,52 @@ class TeacherLoginScreen extends StatefulWidget {
 
 class TeacherLoginScreenState extends State<TeacherLoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String _email = '';
+  final ApiService apiService = ApiService();
+  bool isLoading = false;
+
+  String _worknum = '';
   String _password = '';
 
-  void _submit() {
+  void _submit(String loginType) async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // TODO Login logic
-      print('Email: $_email, Password: $_password');
+      setState(() {
+        isLoading = true;
+      });
 
-      Navigator.pushReplacementNamed(context, '/home');
+      try {
+        LoginResponse response;
+        if (loginType == 'teacher') {
+          response = await apiService.teacherLogin(_worknum, _password);
+        } else {
+          response = await apiService.studentLogin(_worknum, _password);
+        }
+
+        setState(() {
+          isLoading = false;
+        });
+
+        if (response.success) {
+          Navigator.pushReplacementNamed(context, '/home');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.message ?? 'Inicio de sesión exitoso')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.error ?? 'Credenciales incorrectas')),
+          );
+        }
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+
+        print('Error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al conectar con el servidor: $e')),
+        );
+      }
     }
   }
 
@@ -45,19 +83,19 @@ class TeacherLoginScreenState extends State<TeacherLoginScreen> {
                   ),
                   SizedBox(height: 40),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Correo electrónico'),
-                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(labelText: 'Número de empleado'),
+                    keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Introduce tu correo';
+                        return 'Introduce tu número de empleado';
                       }
-                      if (!value.contains('@')) {
-                        return 'Introduce un correo válido';
+                      if (value.length != 6 || int.tryParse(value) == null) {
+                        return 'Introduce un número de empleado válido de 6 dígitos';
                       }
                       return null;
                     },
                     onSaved: (value) {
-                      _email = value!;
+                      _worknum = value!;
                     },
                   ),
                   SizedBox(height: 20),
@@ -78,16 +116,18 @@ class TeacherLoginScreenState extends State<TeacherLoginScreen> {
                     },
                   ),
                   SizedBox(height: 40),
-                  ElevatedButton(
-                    onPressed: _submit,
-                    child: Text('Iniciar sesión'),
-                  ),
+                  isLoading
+                      ? CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: () => _submit('teacher'),
+                          child: Text('Iniciar sesión'),
+                        ),
                 ],
-              )
+              ),
             ),
           ),
         ),
-      )
+      ),
     );
   }
 }
