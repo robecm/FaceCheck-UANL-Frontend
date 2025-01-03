@@ -5,16 +5,16 @@
 
 Proyecto desarrollado por **Alphaware Team**, apoyado por **Accenture**.
 
-## Descripción  
+## ℹ️ Descripción  
 
-FaceCheck UANL es una aplicación móvil creada para verificar la identidad del usuario, ya sea estudiante o docente. El objetivo es capturar rostros en tiempo real, enviar las imágenes al backend para verificación facial y recibir los resultados para asegurar la identidad de los usuarios antes de ingresar a evaluaciones académicas.
+FaceCheck UANL está siendo desarrollado por el equipo de desarrollo Alphaware, parte del capítulo estudiantil CEATI, en colaboración con Accenture para capacitaciones. El propósito del proyecto es crear una aplicación móvil que permita registrar estudiantes, administrativos y profesores. Utilizando reconocimiento facial, la aplicación verifica la identidad de los estudiantes al ingresar a un aula para presentar evaluaciones, evitando fraudes de identidad.
 
-## 🚀 Tecnologías Utilizadas  
+## 🚀 Tecnologías Utilizadas (Front-End)
 - **Flutter**  
 - **Dart**  
 - **Android SDK**  
 
-## Instalación  
+## 📖 Instalación  
 
 Para instalar y configurar el entorno de desarrollo de la app móvil, sigue estos pasos:
 
@@ -31,7 +31,7 @@ Para instalar y configurar el entorno de desarrollo de la app móvil, sigue esto
    pip install -r requirements.txt
    ```
 
-## Contribuir
+## 🧩 Contribuir
 
 Si deseas contribuir al proyecto, por favor sigue estos pasos:
 
