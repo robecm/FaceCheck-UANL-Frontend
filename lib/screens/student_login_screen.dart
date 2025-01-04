@@ -124,7 +124,7 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
                         ),
                   TextButton(
                     onPressed: () {
-                      // TODO Register or recover pwd
+                      Navigator.pushNamed(context, '/student_signup');
                     },
                     child: Text('¿No tienes cuenta? Regístrate'),
                   ),
