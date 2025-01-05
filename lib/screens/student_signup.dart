@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../models/duplicate_response.dart';
+import 'student_face.dart';
 
 class StudentSignupScreen extends StatefulWidget {
   const StudentSignupScreen({super.key});
@@ -23,7 +24,7 @@ class StudentSignupScreenState extends State<StudentSignupScreen> {
   String _matnum = '';
   String _password = '';
   String _confirmPassword = '';
-  String _faceImg = '';
+  final String _faceImg = '';
   String _email = '';
 
   final List<String> _faculties = [
@@ -37,75 +38,72 @@ class StudentSignupScreenState extends State<StudentSignupScreen> {
   ];
 
   void _submit() async {
-    if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+  if (_formKey.currentState != null && _formKey.currentState!.validate()) {
+    _formKey.currentState!.save();
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      // Check for duplicates
+      DuplicateResponse duplicateResponse = await apiService.checkDuplicate(_email, _matnum, _username);
 
       setState(() {
-        isLoading = true;
+        isLoading = false;
       });
 
-      try {
-        // Check for duplicates
-        DuplicateResponse duplicateResponse = await apiService.checkDuplicate(_email, _matnum, _username);
-
-        setState(() {
-          isLoading = false;
-        });
-
-        if (duplicateResponse.success) {
-          // No duplicates found, navigate to the next screen with data TODO UPDATE TS
-          // Navigator.pushReplacement(
-            // context,
-            // MaterialPageRoute(
-            //   builder: (context) => NextScreen(
-            //     name: _name,
-            //     username: _username,
-            //     birthDate: _birthDate!,
-            //     faculty: _faculty,
-            //     matnum: _matnum,
-            //     email: _email,
-            //   ),
-            // ),
-          // );
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('No duplicates found, proceed to the next screen')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Container(
-                height: 40.0,
-                child: Center(
-                  child: Text(
-                    duplicateResponse.duplicateField == 'email'
-                        ? 'This email is already registered'
-                        : duplicateResponse.duplicateField == 'username'
-                            ? 'This username is already registered'
-                            : duplicateResponse.duplicateField == 'matnum'
-                                ? 'This matriculation number is already registered'
-                                : duplicateResponse.duplicateField != null
-                                    ? 'The ${duplicateResponse.duplicateField} is already registered'
-                                    : '${duplicateResponse.error ?? ''}\nDuplicate field: ${duplicateResponse.duplicateField ?? ''}',
-                    textAlign: TextAlign.center,
-                  ),
+      if (duplicateResponse.success) {
+        // No duplicates found, navigate to the next screen with data
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StudentFaceScreen(
+              name: _name,
+              username: _username,
+              birthDate: _birthDate!,
+              faculty: _faculty,
+              matnum: _matnum,
+              email: _email,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: SizedBox(
+              height: 40.0,
+              child: Center(
+                child: Text(
+                  duplicateResponse.duplicateField == 'email'
+                      ? 'This email is already registered'
+                      : duplicateResponse.duplicateField == 'username'
+                          ? 'This username is already registered'
+                          : duplicateResponse.duplicateField == 'matnum'
+                              ? 'This matriculation number is already registered'
+                              : duplicateResponse.duplicateField != null
+                                  ? 'The ${duplicateResponse.duplicateField} is already registered'
+                                  : '${duplicateResponse.error ?? ''}\nDuplicate field: ${duplicateResponse.duplicateField ?? ''}',
+                  textAlign: TextAlign.center,
                 ),
               ),
-              behavior: SnackBarBehavior.floating,
             ),
-          );
-        }
-      } catch (e) {
-        setState(() {
-          isLoading = false;
-        });
-
-        print('Error: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error connecting to the server: $e')),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error connecting to the server: $e')),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
