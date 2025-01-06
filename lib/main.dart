@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/student_signup',
+      initialRoute: '/student_face',
       routes: {
         '/': (context) => SplashScreen(),
         '/login_selection': (context) => LoginSelectionScreen(),
@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
           faculty: '',
           matnum: '',
           email: '',
+          password: '',
         ),
       },
     );
