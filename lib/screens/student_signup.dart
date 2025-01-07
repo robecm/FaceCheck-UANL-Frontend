@@ -28,14 +28,7 @@ class StudentSignupScreenState extends State<StudentSignupScreen> {
   String _email = '';
 
   final List<String> _faculties = [
-    'FIME',
-    'FACPYA',
-    'FOD',
-    'FACDyC',
-    'FARQ',
-    'FIC',
-    'FCB',
-  ];
+    'FIME', 'FACPYA', 'FOD', 'FACDyC', 'FARQ', 'FIC', 'FCB', 'FFYL'];
 
   void _submit() async {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {

@@ -50,14 +50,14 @@ class ApiService {
       Uri.parse('$_baseUrl/api/student-signup'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
-        'name': 'robe',
-        'username': 'username',
-        'age': 20, // Include the age instead of birthDate
-        'faculty': 'faculty',
-        'matnum': 2172148,
-        'password': 'FIME123',
+        'name': name,
+        'username': username,
+        'age': age, // Include the age instead of birthDate
+        'faculty': faculty,
+        'matnum': matnum,
+        'password': password,
         'face_img': faceImg,
-        'email': 'email@mail.com',
+        'email': email,
       })
     );
 
