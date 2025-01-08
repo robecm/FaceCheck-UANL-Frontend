@@ -5,6 +5,7 @@ import '../models/login_response.dart';
 import '../models/duplicate_response.dart';
 import '../models/check_face_response.dart';
 import '../models/check_face_request.dart';
+import '../models/verify_face_response.dart';
 import 'config.dart';
 
 class ApiService {
@@ -89,5 +90,19 @@ class ApiService {
 
     final jsonData = json.decode(response.body);
     return CheckFaceResponse.fromJson(jsonData);
+  }
+
+  Future<VerifyFaceResponse> verifyFace(String capFrame, String refFrame) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/verify-face'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'cap_frame': capFrame,
+        'ref_frame': refFrame,
+      }),
+    );
+
+    final jsonData = json.decode(response.body);
+    return VerifyFaceResponse.fromJson(jsonData);
   }
 }

@@ -13,7 +13,7 @@ class CheckFaceResponse {
 
   factory CheckFaceResponse.fromJson(Map<String, dynamic> json) {
     return CheckFaceResponse(
-      success: json['success'],
+      success: json['success'] as bool,
       statusCode: json['status_code'],
       error: json['error'],
       data: json['data'] != null ? Map<String, dynamic>.from(json['data']) : null,

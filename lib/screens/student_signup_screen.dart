@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../models/duplicate_response.dart';
-import 'student_face.dart';
+import 'student_signup_face.dart';
 
 class StudentSignupScreen extends StatefulWidget {
   const StudentSignupScreen({super.key});
