@@ -3,6 +3,9 @@ import 'package:http/http.dart' as http;
 import '../models/signup_response.dart';
 import '../models/login_response.dart';
 import '../models/duplicate_response.dart';
+import '../models/check_face_response.dart';
+import '../models/check_face_request.dart';
+import '../models/verify_face_response.dart';
 import 'config.dart';
 
 class ApiService {
@@ -37,13 +40,20 @@ class ApiService {
   }
 
   Future<SignupResponse> studentSignup(String name, String username, DateTime birthDate, String faculty, String matnum, String password, String faceImg, String email) async {
+    // Calculate the age
+    final DateTime now = DateTime.now();
+    int age = now.year - birthDate.year;
+    if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+      age--;
+    }
+
     final response = await http.post(
       Uri.parse('$_baseUrl/api/student-signup'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'name': name,
         'username': username,
-        'birthDate': birthDate.toIso8601String(),
+        'age': age, // Include the age instead of birthDate
         'faculty': faculty,
         'matnum': matnum,
         'password': password,
@@ -69,5 +79,30 @@ class ApiService {
 
     final jsonData = json.decode(response.body);
     return DuplicateResponse.fromJson(jsonData);
+  }
+
+  Future<CheckFaceResponse> checkFace(String base64Image) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/check-face'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(CheckFaceRequest(img: base64Image).toJson()),
+    );
+
+    final jsonData = json.decode(response.body);
+    return CheckFaceResponse.fromJson(jsonData);
+  }
+
+  Future<VerifyFaceResponse> verifyFace(String capFrame, String refFrame) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/verify-face'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'cap_frame': capFrame,
+        'ref_frame': refFrame,
+      }),
+    );
+
+    final jsonData = json.decode(response.body);
+    return VerifyFaceResponse.fromJson(jsonData);
   }
 }

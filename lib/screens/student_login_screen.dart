@@ -1,7 +1,7 @@
-// lib/screens/student_login_screen.dart
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../models/login_response.dart';
+import 'student_login_face.dart';
 
 class StudentLoginScreen extends StatefulWidget {
   const StudentLoginScreen({super.key});
@@ -39,7 +39,12 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
         });
 
         if (response.success) {
-          Navigator.pushReplacementNamed(context, '/home');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StudentLoginFaceScreen(faceCode: response.faceImg ?? ''),
+            ),
+          );
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(response.message ?? 'Inicio de sesión exitoso')),
           );
