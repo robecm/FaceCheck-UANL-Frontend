@@ -15,7 +15,21 @@ class StudentApiService {
       final jsonData = json.decode(response.body);
       return List<Map<String, dynamic>>.from(jsonData['data']);
     } else {
-      throw Exception('Failed to load student classes');
+      throw Exception("Failed to load the student's classes");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> retrieveStudentTeachers(int studentId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/retrieve-student-teachers?student_id=$studentId'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      return List<Map<String, dynamic>>.from(jsonData['data']);
+    } else {
+      throw Exception("Failed to load the student's teachers");
     }
   }
 }
