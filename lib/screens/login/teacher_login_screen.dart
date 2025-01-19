@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import '../models/login_response.dart';
+import '../../services/api_service.dart';
+import '../../models/login_response.dart';
 import 'teacher_login_face.dart';
 
 class TeacherLoginScreen extends StatefulWidget {

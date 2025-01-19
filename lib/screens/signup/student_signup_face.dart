@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io' if (dart.library.html) 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import '../services/api_service.dart';
+import '../../services/api_service.dart';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
 

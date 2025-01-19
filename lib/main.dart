@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_screen.dart';
-import 'screens/login_selection.dart';
-import 'screens/student_login_screen.dart';
-import 'screens/teacher_login_screen.dart';
-import 'screens/student_signup_screen.dart';
-import 'screens/student_signup_face.dart';
+import 'screens/animation/splash_screen.dart';
+import 'screens/login/login_selection.dart';
+import 'screens/login/student_login_screen.dart';
+import 'screens/login/teacher_login_screen.dart';
+import 'screens/signup/student_signup_screen.dart';
+import 'screens/signup/student_signup_face.dart';
+import 'screens/student_home/student_home_screen.dart';
 
 void main() {
+  debugPrint = (String? message, {int? wrapWidth}) {};
   runApp(MyApp());
 }
 
@@ -17,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/student_login',
+      initialRoute: '/student_home',
       routes: {
         '/': (context) => SplashScreen(),
         '/login_selection': (context) => LoginSelectionScreen(),
@@ -34,6 +36,7 @@ class MyApp extends StatelessWidget {
           email: '',
           password: '',
         ),
+        '/student_home': (context) => StudentHomeScreen(),
       },
     );
   }
