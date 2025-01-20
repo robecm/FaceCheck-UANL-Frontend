@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'student_classes_screen.dart';
 import 'student_teachers_screen.dart';
+import 'student_exams_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   final int studentId;
 
-  const StudentHomeScreen({super.key, this.studentId = 102}); // Default value for debugging
+  const StudentHomeScreen({super.key, this.studentId = 103}); // Default value for debugging
 
   @override
   StudentHomeScreenState createState() => StudentHomeScreenState();
@@ -179,8 +180,13 @@ class StudentHomeScreenState extends State<StudentHomeScreen> {
                   height: 360, // Adjust the height as needed
                   child: ElevatedButton(
                     onPressed: () {
-                      // Handle button press
-                      print('Exámenes button pressed');
+                      // Navigate to StudentExamsScreen and pass studentId
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StudentExamsScreen(studentId: studentId),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.all(8.0), // Reduce the padding

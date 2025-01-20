@@ -13,7 +13,7 @@ class ApiService {
 
   Future<LoginResponse> studentLogin(String matnum, String password) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/api/student-login'),
+      Uri.parse('$_baseUrl/api/login/student'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'matnum': matnum,
@@ -27,7 +27,7 @@ class ApiService {
 
   Future<LoginResponse> teacherLogin(String worknum, String password) async {
     final response = await http.post(
-        Uri.parse('$_baseUrl/api/teacher-login'),
+        Uri.parse('$_baseUrl/api/login/teacher'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'worknum': worknum,
@@ -48,7 +48,7 @@ class ApiService {
     }
 
     final response = await http.post(
-      Uri.parse('$_baseUrl/api/student-signup'),
+      Uri.parse('$_baseUrl/api/signup/student'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'name': name,
@@ -68,7 +68,7 @@ class ApiService {
 
   Future<DuplicateResponse> checkDuplicate(String email, String matnum, String username) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/api/check-duplicate'),
+      Uri.parse('$_baseUrl/api/signup/student-duplicate'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'email': email,
@@ -83,7 +83,7 @@ class ApiService {
 
   Future<CheckFaceResponse> checkFace(String base64Image) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/api/check-face'),
+      Uri.parse('$_baseUrl/api/face/check-existing'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(CheckFaceRequest(img: base64Image).toJson()),
     );
@@ -94,7 +94,7 @@ class ApiService {
 
   Future<VerifyFaceResponse> verifyFace(String capFrame, String refFrame) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/api/verify-face'),
+      Uri.parse('$_baseUrl/api/face/verify'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'cap_frame': capFrame,

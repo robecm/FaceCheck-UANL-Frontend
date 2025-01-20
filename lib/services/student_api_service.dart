@@ -7,7 +7,7 @@ class StudentApiService {
 
   Future<List<Map<String, dynamic>>> retrieveStudentClasses(int studentId) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/api/retrieve-student-classes?student_id=$studentId'),
+      Uri.parse('$_baseUrl/api/student/classes?student_id=$studentId'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -21,7 +21,7 @@ class StudentApiService {
 
   Future<List<Map<String, dynamic>>> retrieveStudentTeachers(int studentId) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/api/retrieve-student-teachers?student_id=$studentId'),
+      Uri.parse('$_baseUrl/api/student/teachers?student_id=$studentId'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -32,4 +32,19 @@ class StudentApiService {
       throw Exception("Failed to load the student's teachers");
     }
   }
+
+  Future<List<Map<String, dynamic>>> retrieveStudentExams(int studentId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/student/exams?student_id=$studentId'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      return List<Map<String, dynamic>>.from(jsonData['data']);
+    } else {
+      throw Exception("Failed to load the student's exams");
+    }
+  }
+
 }
