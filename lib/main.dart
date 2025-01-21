@@ -6,6 +6,7 @@ import 'screens/login/teacher_login_screen.dart';
 import 'screens/signup/student_signup_screen.dart';
 import 'screens/signup/student_signup_face.dart';
 import 'screens/student_home/student_home_screen.dart';
+import 'screens/teacher_home/teacher_home_screen.dart';
 
 void main() {
   debugPrint = (String? message, {int? wrapWidth}) {};
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/student_home',
+      initialRoute: '/teacher_home',
       routes: {
         '/': (context) => SplashScreen(),
         '/login_selection': (context) => LoginSelectionScreen(),
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
           password: '',
         ),
         '/student_home': (context) => StudentHomeScreen(),
+        '/teacher_home': (context) => TeacherHomeScreen(),
       },
     );
   }
