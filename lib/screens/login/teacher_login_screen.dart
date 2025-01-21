@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import '../models/login_response.dart';
-import 'student_login_face.dart';
+import '../../services/user_api_service.dart';
+import '../../models/login_response.dart';
+import 'teacher_login_face.dart';
 
-class StudentLoginScreen extends StatefulWidget {
-  const StudentLoginScreen({super.key});
+class TeacherLoginScreen extends StatefulWidget {
+  const TeacherLoginScreen({super.key});
 
   @override
-  StudentLoginScreenState createState() => StudentLoginScreenState();
+  TeacherLoginScreenState createState() => TeacherLoginScreenState();
 }
 
-class StudentLoginScreenState extends State<StudentLoginScreen> {
+class TeacherLoginScreenState extends State<TeacherLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final ApiService apiService = ApiService();
   bool isLoading = false;
 
-  String _matnum = '';
+  String _worknum = '';
   String _password = '';
 
   void _submit(String loginType) async {
@@ -28,10 +28,10 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
 
       try {
         LoginResponse response;
-        if (loginType == 'student') {
-          response = await apiService.studentLogin(_matnum, _password);
+        if (loginType == 'teacher') {
+          response = await apiService.teacherLogin(_worknum, _password);
         } else {
-          response = await apiService.teacherLogin(_matnum, _password);
+          response = await apiService.studentLogin(_worknum, _password);
         }
 
         setState(() {
@@ -42,7 +42,7 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => StudentLoginFaceScreen(faceCode: response.faceImg ?? ''),
+              builder: (context) => TeacherLoginFaceScreen(faceCode: response.faceImg ?? ''),
             ),
           );
           ScaffoldMessenger.of(context).showSnackBar(
@@ -83,24 +83,24 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Estudiantes',
+                    'Docentes',
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 40),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Matrícula'),
+                    decoration: InputDecoration(labelText: 'Número de empleado'),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Introduce tu matrícula';
+                        return 'Introduce tu número de empleado';
                       }
-                      if (value.length != 7 || int.tryParse(value) == null) {
-                        return 'Introduce una matrícula válida de 7 dígitos';
+                      if (value.length != 6 || int.tryParse(value) == null) {
+                        return 'Introduce un número de empleado válido de 6 dígitos';
                       }
                       return null;
                     },
                     onSaved: (value) {
-                      _matnum = value!;
+                      _worknum = value!;
                     },
                   ),
                   SizedBox(height: 20),
@@ -124,15 +124,9 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
                   isLoading
                       ? CircularProgressIndicator()
                       : ElevatedButton(
-                          onPressed: () => _submit('student'),
+                          onPressed: () => _submit('teacher'),
                           child: Text('Iniciar sesión'),
                         ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/student_signup');
-                    },
-                    child: Text('¿No tienes cuenta? Regístrate'),
-                  ),
                 ],
               ),
             ),

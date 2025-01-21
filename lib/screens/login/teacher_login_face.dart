@@ -2,22 +2,22 @@ import 'dart:convert';
 import 'dart:io' if (dart.library.html) 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import '../services/api_service.dart';
-import '../models/verify_face_response.dart';
+import '../../services/user_api_service.dart';
+import '../../models/verify_face_response.dart';
 
-class StudentLoginFaceScreen extends StatefulWidget {
+class TeacherLoginFaceScreen extends StatefulWidget {
   final String faceCode;
 
-  const StudentLoginFaceScreen({
+  const TeacherLoginFaceScreen({
     super.key,
     required this.faceCode,
   });
 
   @override
-  StudentLoginFaceScreenState createState() => StudentLoginFaceScreenState();
+  TeacherLoginFaceScreenState createState() => TeacherLoginFaceScreenState();
 }
 
-class StudentLoginFaceScreenState extends State<StudentLoginFaceScreen> {
+class TeacherLoginFaceScreenState extends State<TeacherLoginFaceScreen> {
   CameraController? _controller;
   List<CameraDescription>? cameras;
   bool _isCameraInitialized = false;
