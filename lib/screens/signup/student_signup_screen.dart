@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/user_api_service.dart';
-import '../../models/duplicate_response.dart';
+import '../../models/signup/duplicate_response.dart';
 import '../signup/student_signup_face.dart';
 
 class StudentSignupScreen extends StatefulWidget {

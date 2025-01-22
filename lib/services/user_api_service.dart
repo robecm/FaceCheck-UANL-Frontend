@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/signup_response.dart';
-import '../models/login_response.dart';
-import '../models/duplicate_response.dart';
-import '../models/check_face_response.dart';
-import '../models/check_face_request.dart';
-import '../models/verify_face_response.dart';
+import '../models/signup/signup_response.dart';
+import '../models/login/login_response.dart';
+import '../models/signup/duplicate_response.dart';
+import '../models/face/check_face_response.dart';
+import '../models/face/check_face_request.dart';
+import '../models/face/verify_face_response.dart';
 import 'config.dart';
 
 class ApiService {

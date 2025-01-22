@@ -3,7 +3,7 @@ import 'dart:io' if (dart.library.html) 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../../services/user_api_service.dart';
-import '../../models/verify_face_response.dart';
+import '../../models/face/verify_face_response.dart';
 
 class TeacherLoginFaceScreen extends StatefulWidget {
   final String faceCode;
