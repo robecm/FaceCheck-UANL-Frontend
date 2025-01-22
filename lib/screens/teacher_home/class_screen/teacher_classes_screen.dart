@@ -60,6 +60,24 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               ),
             ),
             Divider(),
+
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('Ver estudiantes'),
+              onTap: () {
+                // Handle 'Ver estudiantes' action
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.assignment),
+              title: Text('Ver exámenes'),
+              onTap: () {
+                // Handle 'Ver exámenes' action
+                Navigator.pop(context);
+              },
+            ),
+
             ListTile(
               leading: Icon(Icons.edit),
               title: Text('Modificar Clase'),
@@ -77,18 +95,10 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.person_add),
-              title: Text('Agregar estudiante a clase'),
+              leading: Icon(Icons.delete),
+              title: Text('Eliminar Clase'),
               onTap: () {
-                // Handle 'Agregar estudiante a clase' action
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.assignment),
-              title: Text('Ver exámenes'),
-              onTap: () {
-                // Handle 'Ver exámenes' action
+                // Handle 'Eliminar Clase' action
                 Navigator.pop(context);
               },
             ),
