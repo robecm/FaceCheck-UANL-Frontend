@@ -60,7 +60,6 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               ),
             ),
             Divider(),
-
             ListTile(
               leading: Icon(Icons.people),
               title: Text('Ver estudiantes'),
@@ -77,7 +76,6 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                 Navigator.pop(context);
               },
             ),
-
             ListTile(
               leading: Icon(Icons.edit),
               title: Text('Modificar Clase'),
@@ -98,14 +96,57 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               leading: Icon(Icons.delete),
               title: Text('Eliminar Clase'),
               onTap: () {
-                // Handle 'Eliminar Clase' action
                 Navigator.pop(context);
+                _confirmDeleteClass(context, classInfo.classId.toString(), classInfo.className);
               },
             ),
           ],
         );
       },
     );
+  }
+
+  void _confirmDeleteClass(BuildContext context, String classId, String className) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmar eliminación'),
+          content: Text('¿Estás seguro de que deseas eliminar la clase "$className"?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Eliminar'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteClass(classId);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteClass(String classId) async {
+    try {
+      final apiService = TeacherApiService();
+      final response = await apiService.deleteClass(classId);
+      if (response.success) {
+        retrieveTeacherClasses(); // Refresh the data
+      } else {
+        // Handle error
+        print('Failed to delete class: ${response.error}');
+      }
+    } catch (e) {
+      // Handle error
+      print('Failed to delete class: $e');
+    }
   }
 
   @override

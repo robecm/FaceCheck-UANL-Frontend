@@ -5,6 +5,7 @@ import '../models/teacher/class/modify_class_request.dart';
 import '../models/teacher/class/modify_class_response.dart';
 import '../models/teacher/class/create_class_request.dart';
 import '../models/teacher/class/create_class_response.dart';
+import '../models/teacher/class/delete_class_response.dart';
 
 class TeacherApiService {
   final String _baseUrl = AppConfig.baseUrl;
@@ -49,5 +50,18 @@ class TeacherApiService {
 
     final jsonData = json.decode(response.body);
     return CreateClassResponse.fromJson(jsonData);
+  }
+
+  Future<DeleteClassResponse> deleteClass(String classId) async {
+    final url = Uri.parse('$_baseUrl/api/class/delete?class_id=$classId');
+    final response = await http.delete(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    final jsonData = json.decode(response.body);
+    return DeleteClassResponse.fromJson(jsonData);
   }
 }
