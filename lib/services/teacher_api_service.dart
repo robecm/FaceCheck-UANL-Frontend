@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'config.dart';
 import '../models/teacher/class/modify_class_request.dart';
 import '../models/teacher/class/modify_class_response.dart';
+import '../models/teacher/class/create_class_request.dart';
+import '../models/teacher/class/create_class_response.dart';
 
 class TeacherApiService {
   final String _baseUrl = AppConfig.baseUrl;
@@ -33,5 +35,19 @@ class TeacherApiService {
 
     final jsonData = json.decode(response.body);
     return ModifyClassResponse.fromJson(jsonData);
+  }
+
+  Future<CreateClassResponse> createClass(CreateClassRequest request) async {
+    final url = Uri.parse('$_baseUrl/api/class/register');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(request.toJson()),
+    );
+
+    final jsonData = json.decode(response.body);
+    return CreateClassResponse.fromJson(jsonData);
   }
 }

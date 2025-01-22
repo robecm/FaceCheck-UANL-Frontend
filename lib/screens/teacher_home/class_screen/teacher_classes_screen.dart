@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../services/teacher_api_service.dart';
 import '../../../models/teacher/retrieve_teacher_classes_response.dart';
 import 'modify_class_screen.dart';
+import 'create_class_screen.dart';
 
 class TeacherClassesScreen extends StatefulWidget {
   final int teacherId;
@@ -184,6 +185,21 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                       );
                     },
                   ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreateClassScreen(teacherId: teacherId),
+            ),
+          );
+          if (result == true) {
+            retrieveTeacherClasses(); // Refresh the data
+          }
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.blue,
       ),
     );
   }

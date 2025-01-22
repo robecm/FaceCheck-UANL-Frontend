@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/student_api_service.dart';
-import '../../models/student_response/retrieve_student_teachers_response.dart';
+import '../../models/student/retrieve_student_teachers_response.dart';
 
 class StudentTeachersScreen extends StatefulWidget {
   final int studentId;
