@@ -132,6 +132,7 @@ class TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   child: ElevatedButton(
                     onPressed: () {
                       print('ESTUDIANTES button pressed');
+                      // TODO Implement student screen
                     },
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.all(8.0), // Reduce the padding
@@ -172,6 +173,7 @@ class TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   child: ElevatedButton(
                     onPressed: () {
                       print('EXÁMENES button pressed');
+                      // TODO Implement exam screen
                     },
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.all(8.0), // Reduce the padding

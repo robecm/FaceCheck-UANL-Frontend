@@ -64,4 +64,18 @@ class TeacherApiService {
     final jsonData = json.decode(response.body);
     return DeleteClassResponse.fromJson(jsonData);
   }
+
+  Future<List<Map<String, dynamic>>> retrieveClassExams(int classId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/class/exams?class_id=$classId'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      return List<Map<String, dynamic>>.from(jsonData['data']);
+    } else {
+      throw Exception("Failed to load the class's exams");
+    }
+  }
 }
