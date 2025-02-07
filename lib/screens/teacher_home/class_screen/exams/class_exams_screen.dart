@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../services/teacher_api_service.dart';
-import '../../../../models/teacher/class/exams/retrieve_class_exams_response.dart'; // Correct import
+import '../../../../models/teacher/class/exams/retrieve_class_exams_response.dart';
+import 'create_class_exam_screen.dart';
 
 class ClassExamsScreen extends StatefulWidget {
   final int classId;
@@ -140,8 +141,19 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
                   ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Implement add exam functionality
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CreateClassExamScreen(
+                classId: classId,
+                className: className,
+              ),
+            ),
+          );
+          if (result == true) {
+            retrieveClassExams();
+          }
         },
         child: Icon(Icons.add),
         backgroundColor: Colors.blue,

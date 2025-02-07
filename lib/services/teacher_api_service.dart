@@ -93,7 +93,12 @@ class TeacherApiService {
       body: jsonEncode(request.toJson()),
     );
 
-    final jsonData = json.decode(response.body);
-    return CreateClassExamResponse.fromJson(jsonData);
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      return CreateClassExamResponse.fromJson(jsonData);
+    } else {
+      final jsonData = json.decode(response.body);
+      return CreateClassExamResponse.fromJson(jsonData);
+    }
   }
 }
