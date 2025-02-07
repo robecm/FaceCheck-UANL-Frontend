@@ -6,6 +6,9 @@ import '../models/teacher/class/modify_class_response.dart';
 import '../models/teacher/class/create_class_request.dart';
 import '../models/teacher/class/create_class_response.dart';
 import '../models/teacher/class/delete_class_response.dart';
+import '../models/teacher/class/exams/retrieve_class_exams_response.dart'; // Correct import
+import '../models/teacher/class/exams/create_class_exam_request.dart';
+import '../models/teacher/class/exams/create_class_exam_response.dart';
 
 class TeacherApiService {
   final String _baseUrl = AppConfig.baseUrl;
@@ -65,7 +68,7 @@ class TeacherApiService {
     return DeleteClassResponse.fromJson(jsonData);
   }
 
-  Future<List<Map<String, dynamic>>> retrieveClassExams(int classId) async {
+  Future<RetrieveClassExamsResponse> retrieveClassExams(int classId) async {
     final response = await http.get(
       Uri.parse('$_baseUrl/api/class/exams?class_id=$classId'),
       headers: {'Content-Type': 'application/json'},
@@ -73,9 +76,24 @@ class TeacherApiService {
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
-      return List<Map<String, dynamic>>.from(jsonData['data']);
+      return RetrieveClassExamsResponse.fromJson(jsonData);
     } else {
-      throw Exception("Failed to load the class's exams");
+      final jsonData = json.decode(response.body);
+      return RetrieveClassExamsResponse.fromJson(jsonData);
     }
+  }
+
+  Future<CreateClassExamResponse> createClassExam(CreateClassExamRequest request) async {
+    final url = Uri.parse('$_baseUrl/api/exam/create');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(request.toJson()),
+    );
+
+    final jsonData = json.decode(response.body);
+    return CreateClassExamResponse.fromJson(jsonData);
   }
 }
