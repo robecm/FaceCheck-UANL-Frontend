@@ -6,8 +6,10 @@ import '../../../../services/teacher_api_service.dart';
 class CreateClassExamScreen extends StatefulWidget {
   final int classId;
   final String className;
+  final String classHour; // Add classHour
+  final String classRoom; // Add classRoom
 
-  const CreateClassExamScreen({super.key, required this.classId, required this.className});
+  const CreateClassExamScreen({super.key, required this.classId, required this.className, required this.classHour, required this.classRoom});
 
   @override
   _CreateClassExamScreenState createState() => _CreateClassExamScreenState();
@@ -17,16 +19,12 @@ class _CreateClassExamScreenState extends State<CreateClassExamScreen> {
   late TextEditingController examNameController;
   late TextEditingController classRoomController;
   late TextEditingController dateController;
-  String? selectedHour;
+  late TextEditingController hourController;
   bool isLoading = false;
-
+  bool useClassHour = true;
+  bool useClassRoom = true; // Add useClassRoom
+  String? selectedHour;
   final _formKey = GlobalKey<FormState>();
-
-  final List<String> hourOptions = [
-    'M1', 'M2', 'M3', 'M4', 'M5', 'M6',
-    'V1', 'V2', 'V3', 'V4', 'V5', 'V6',
-    'N1', 'N2', 'N3', 'N4', 'N5', 'N6',
-  ];
 
   @override
   void initState() {
@@ -34,6 +32,7 @@ class _CreateClassExamScreenState extends State<CreateClassExamScreen> {
     examNameController = TextEditingController();
     classRoomController = TextEditingController();
     dateController = TextEditingController();
+    hourController = TextEditingController();
   }
 
   @override
@@ -41,6 +40,7 @@ class _CreateClassExamScreenState extends State<CreateClassExamScreen> {
     examNameController.dispose();
     classRoomController.dispose();
     dateController.dispose();
+    hourController.dispose();
     super.dispose();
   }
 
@@ -58,6 +58,19 @@ class _CreateClassExamScreenState extends State<CreateClassExamScreen> {
     }
   }
 
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        hourController.text = picked.format(context);
+        selectedHour = picked.format(context);
+      });
+    }
+  }
+
   Future<void> _createExam() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -71,8 +84,8 @@ class _CreateClassExamScreenState extends State<CreateClassExamScreen> {
       examName: examNameController.text,
       classId: widget.classId,
       date: dateController.text,
-      classRoom: classRoomController.text,
-      hour: selectedHour!,
+      classRoom: useClassRoom ? widget.classRoom : classRoomController.text, // Use classRoom if useClassRoom is true
+      hour: useClassHour ? widget.classHour : selectedHour!, // Use classHour if useClassHour is true
     );
 
     try {
@@ -81,12 +94,12 @@ class _CreateClassExamScreenState extends State<CreateClassExamScreen> {
 
       if (response.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Exam created successfully')),
+          SnackBar(content: Text('Examen creado correctamente')),
         );
-        Navigator.pop(context, true); // Pass true to indicate success
+        Navigator.pop(context, true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create exam: ${response.error}')),
+          SnackBar(content: Text('Error al crear examen: ${response.error}')),
         );
       }
     } catch (e) {
@@ -104,7 +117,7 @@ class _CreateClassExamScreenState extends State<CreateClassExamScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Exam for ${widget.className}'),
+        title: Text('Crear Examen de ${widget.className}'),
         centerTitle: true,
       ),
       body: Padding(
@@ -115,72 +128,91 @@ class _CreateClassExamScreenState extends State<CreateClassExamScreen> {
             children: [
               TextFormField(
                 controller: examNameController,
-                decoration: InputDecoration(
-                  labelText: 'Exam Name',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Exam name cannot be empty';
-                  }
-                  return null;
-                },
+                decoration: InputDecoration(labelText: 'Nombre de Examen'),
+                validator: (value) => value == null || value.isEmpty ? 'El nombre del examen no puede estar vacío' : null,
               ),
-              TextFormField(
-                controller: classRoomController,
-                decoration: InputDecoration(
-                  labelText: 'Class Room',
+              ListTile(
+                title: Text('Mismo salón de clase'),
+                leading: Radio<bool>(
+                  value: true,
+                  groupValue: useClassRoom,
+                  onChanged: (value) {
+                    setState(() {
+                      useClassRoom = value!;
+                    });
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Class room cannot be empty';
-                  }
-                  return null;
-                },
               ),
+              ListTile(
+                title: Text('Seleccionar salón'),
+                leading: Radio<bool>(
+                  value: false,
+                  groupValue: useClassRoom,
+                  onChanged: (value) {
+                    setState(() {
+                      useClassRoom = value!;
+                    });
+                  },
+                ),
+              ),
+              if (!useClassRoom)
+                TextFormField(
+                  controller: classRoomController,
+                  decoration: InputDecoration(labelText: 'Salón'),
+                  validator: (value) => value == null || value.isEmpty ? 'El salón no puede estar vacío' : null,
+                ),
               TextFormField(
                 controller: dateController,
-                decoration: InputDecoration(
-                  labelText: 'Date',
-                ),
+                decoration: InputDecoration(labelText: 'Fecha'),
                 readOnly: true,
                 onTap: () => _selectDate(context),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Date cannot be empty';
-                  }
-                  return null;
-                },
+                validator: (value) => value == null || value.isEmpty ? 'La fecha no puede estar vacía' : null,
               ),
-              DropdownButtonFormField<String>(
-                value: selectedHour,
-                decoration: InputDecoration(
-                  labelText: 'Hour',
+              ListTile(
+                title: Text('Hora Clase'),
+                leading: Radio<bool>(
+                  value: true,
+                  groupValue: useClassHour,
+                  onChanged: (value) {
+                    setState(() {
+                      useClassHour = value!;
+                      selectedHour = null;
+                    });
+                  },
                 ),
-                items: hourOptions.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedHour = newValue;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Hour cannot be empty';
-                  }
-                  return null;
-                },
               ),
+              ListTile(
+                title: Text('Seleccionar Hora'),
+                leading: Radio<bool>(
+                  value: false,
+                  groupValue: useClassHour,
+                  onChanged: (value) {
+                    setState(() {
+                      useClassHour = value!;
+                    });
+                  },
+                ),
+              ),
+              if (!useClassHour)
+                TextFormField(
+                  controller: hourController,
+                  decoration: InputDecoration(labelText: 'Hora (HH:mm)'),
+                  readOnly: true,
+                  onTap: () => _selectTime(context),
+                  validator: (value) {
+                    if (!useClassHour && (value == null || value.isEmpty)) {
+                      return 'La hora no puede estar vacía';
+                    }
+                    return null;
+                  },
+                ),
               SizedBox(height: 20),
               isLoading
                   ? Center(child: CircularProgressIndicator())
                   : ElevatedButton(
-                      onPressed: _createExam,
-                      child: Text('Save Changes'),
-                    ),
+                onPressed: _createExam,
+                child: Text('Crear Examen'),
+              ),
             ],
           ),
         ),

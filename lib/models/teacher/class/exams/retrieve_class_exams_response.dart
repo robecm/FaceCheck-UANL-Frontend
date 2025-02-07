@@ -33,33 +33,41 @@ class RetrieveClassExamsResponse {
 }
 
 class ExamData {
-  final String? examName;
-  final String? examDate;
-  final String? startTime;
-  final String? endTime;
+  final int classId;
+  final String classRoom;
+  final String date;
+  final int examId;
+  final String examName;
+  final String hour;
 
   ExamData({
-    this.examName,
-    this.examDate,
-    this.startTime,
-    this.endTime,
+    required this.classId,
+    required this.classRoom,
+    required this.date,
+    required this.examId,
+    required this.examName,
+    required this.hour,
   });
 
   factory ExamData.fromJson(Map<String, dynamic> json) {
     return ExamData(
+      classId: json['class_id'],
+      classRoom: json['class_room'],
+      date: json['date'],
+      examId: json['exam_id'],
       examName: json['exam_name'],
-      examDate: json['exam_date'],
-      startTime: json['start_time'],
-      endTime: json['end_time'],
+      hour: json['hour'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'class_id': classId,
+      'class_room': classRoom,
+      'date': date,
+      'exam_id': examId,
       'exam_name': examName,
-      'exam_date': examDate,
-      'start_time': startTime,
-      'end_time': endTime,
+      'hour': hour,
     };
   }
 }

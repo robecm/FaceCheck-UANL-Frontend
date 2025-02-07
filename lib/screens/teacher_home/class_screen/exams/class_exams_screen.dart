@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import '../../../../services/teacher_api_service.dart';
 import '../../../../models/teacher/class/exams/retrieve_class_exams_response.dart';
 import 'create_class_exam_screen.dart';
@@ -6,8 +8,10 @@ import 'create_class_exam_screen.dart';
 class ClassExamsScreen extends StatefulWidget {
   final int classId;
   final String className;
+  final String classHour;
+  final String classRoom; // Add classRoom
 
-  const ClassExamsScreen({super.key, required this.classId, required this.className});
+  const ClassExamsScreen({super.key, required this.classId, required this.className, required this.classHour, required this.classRoom});
 
   @override
   ClassExamsScreenState createState() => ClassExamsScreenState();
@@ -16,6 +20,8 @@ class ClassExamsScreen extends StatefulWidget {
 class ClassExamsScreenState extends State<ClassExamsScreen> {
   late int classId;
   late String className;
+  late String classHour;
+  late String classRoom; // Add classRoom
   bool isLoading = true;
   List<ExamData> exams = [];
 
@@ -24,7 +30,11 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
     super.initState();
     classId = widget.classId;
     className = widget.className;
-    retrieveClassExams();
+    classHour = widget.classHour;
+    classRoom = widget.classRoom; // Initialize classRoom
+    initializeDateFormatting('es_ES', null).then((_) {
+      retrieveClassExams();
+    });
   }
 
   Future<void> retrieveClassExams() async {
@@ -52,7 +62,7 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
               child: Text(
-                exam.examName ?? '',
+                exam.examName,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0,
@@ -91,6 +101,19 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
     );
   }
 
+  String _formatDate(String date) {
+    final DateTime parsedDate = DateFormat('EEE, dd MMM yyyy HH:mm:ss').parse(date, true).toLocal();
+    final DateFormat formatter = DateFormat('EEEE, dd/MM/yyyy', 'es_ES');
+    String formattedDate = formatter.format(parsedDate);
+    return formattedDate[0].toUpperCase() + formattedDate.substring(1);
+  }
+
+  String _formatHour(String hour) {
+    final DateTime parsedHour = DateFormat('HH:mm:ss').parse(hour);
+    final DateFormat formatter = DateFormat('HH:mm');
+    return formatter.format(parsedHour);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,15 +146,49 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  exam.examName ?? '',
+                                  exam.examName,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 24.0,
                                     color: Colors.blue,
                                   ),
                                 ),
-                                Text('Fecha: ${exam.examDate ?? ''}'),
-                                Text('Hora: ${exam.startTime ?? ''} - ${exam.endTime ?? ''}'),
+                                RichText(
+                                  text: TextSpan(
+                                    style: DefaultTextStyle.of(context).style,
+                                    children: [
+                                      TextSpan(
+                                        text: 'Fecha: ',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(text: _formatDate(exam.date)),
+                                    ],
+                                  ),
+                                ),
+                                RichText(
+                                  text: TextSpan(
+                                    style: DefaultTextStyle.of(context).style,
+                                    children: [
+                                      TextSpan(
+                                        text: 'Hora: ',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(text: _formatHour(exam.hour)),
+                                    ],
+                                  ),
+                                ),
+                                RichText(
+                                  text: TextSpan(
+                                    style: DefaultTextStyle.of(context).style,
+                                    children: [
+                                      TextSpan(
+                                        text: 'Salón: ',
+                                        style: TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      TextSpan(text: exam.classRoom),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -148,6 +205,8 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
               builder: (context) => CreateClassExamScreen(
                 classId: classId,
                 className: className,
+                classHour: classHour,
+                classRoom: classRoom, // Pass classRoom
               ),
             ),
           );

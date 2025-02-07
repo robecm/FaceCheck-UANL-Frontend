@@ -80,6 +80,8 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                     builder: (context) => ClassExamsScreen(
                       classId: classInfo.classId,
                       className: classInfo.className,
+                      classHour: classInfo.startTime, // Pass classHour
+                      classRoom: classInfo.classRoom, // Pass classRoom
                     ),
                   ),
                 );
