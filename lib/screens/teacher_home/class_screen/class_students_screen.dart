@@ -3,6 +3,8 @@ import '../../../services/teacher_api_service.dart';
 import '../../../models/teacher/class/retrieve_class_students_response.dart';
 import '../../../models/teacher/class/class_add_student_request.dart';
 import '../../../models/teacher/class/class_add_student_response.dart';
+import '../../../models/teacher/class/class_delete_student_request.dart';
+import '../../../models/teacher/class/class_delete_student_response.dart';
 
 class ClassStudentsScreen extends StatefulWidget {
   final int classId;
@@ -40,11 +42,11 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen> {
     }
   }
 
-  Future<void> addStudentToClass(int matnum) async {
+  Future<void> addStudentToClass(int studentId) async {
     try {
-      print('Adding student with ID: $matnum to class with ID: ${widget.classId}');
+      print('Adding student with ID: $studentId to class with ID: ${widget.classId}');
       final apiService = TeacherApiService();
-      final request = ClassAddStudentRequest(matnum: matnum, classId: widget.classId);
+      final request = ClassAddStudentRequest(matnum: studentId, classId: widget.classId);
       final response = await apiService.addStudentToClass(request);
       if (response.success) {
         retrieveClassStudents();
@@ -56,6 +58,22 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen> {
       }
     } catch (e) {
       _showErrorDialog('Failed to add student: $e');
+    }
+  }
+
+  Future<void> deleteStudentFromClass(int studentId) async {
+    try {
+      final apiService = TeacherApiService();
+      final request = ClassDeleteStudentRequest(classId: widget.classId.toString(), studentId: studentId.toString());
+      final response = await apiService.deleteStudentFromClass(request);
+      if (response.success) {
+        retrieveClassStudents();
+        Navigator.of(context).pop();
+      } else {
+        _showErrorDialog('Failed to delete student: ${response.error}');
+      }
+    } catch (e) {
+      _showErrorDialog('Failed to delete student: $e');
     }
   }
 
@@ -101,14 +119,61 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen> {
                       return;
                     }
                     final int studentId = int.parse(matriculaText);
-                    final apiService = TeacherApiService();
-                    final response = await apiService.retrieveClassStudents(studentId.toString());
                     await addStudentToClass(studentId);
                   },
                 ),
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showDeleteStudentDialog(int studentId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Eliminar estudiante'),
+          content: Text('¿Está seguro de que desea eliminar a este estudiante de la clase?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Eliminar'),
+              onPressed: () async {
+                await deleteStudentFromClass(studentId);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showStudentOptions(int studentId) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.delete),
+                title: Text('Eliminar estudiante de clase'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showDeleteStudentDialog(studentId);
+                },
+              ),
+            ],
+          ),
         );
       },
     );
@@ -156,27 +221,30 @@ class _ClassStudentsScreenState extends State<ClassStudentsScreen> {
                     itemCount: students.length,
                     itemBuilder: (context, index) {
                       final student = students[index];
-                      return Card(
-                        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                        child: Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                student.name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18.0,
-                                  color: Colors.blue,
+                      return GestureDetector(
+                        onTap: () => _showStudentOptions(student.id),
+                        child: Card(
+                          margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          child: Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  student.name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18.0,
+                                    color: Colors.blue,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 2),
-                              Text('Matrícula: ${student.matnum}', style: TextStyle(fontSize: 14.0)),
-                              Text('Correo: ${student.email}', style: TextStyle(fontSize: 14.0)),
-                              Text('Facultad: ${student.faculty}', style: TextStyle(fontSize: 14.0)),
-                              Text('Usuario: ${student.username}', style: TextStyle(fontSize: 14.0)),
-                            ],
+                                SizedBox(height: 2),
+                                Text('Matrícula: ${student.matnum}', style: TextStyle(fontSize: 14.0)),
+                                Text('Correo: ${student.email}', style: TextStyle(fontSize: 14.0)),
+                                Text('Facultad: ${student.faculty}', style: TextStyle(fontSize: 14.0)),
+                                Text('Usuario: ${student.username}', style: TextStyle(fontSize: 14.0)),
+                              ],
+                            ),
                           ),
                         ),
                       );

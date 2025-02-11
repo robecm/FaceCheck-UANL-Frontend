@@ -12,6 +12,8 @@ import '../models/teacher/class/exams/create_class_exam_response.dart';
 import '../models/teacher/class/retrieve_class_students_response.dart';
 import '../models/teacher/class/class_add_student_request.dart';
 import '../models/teacher/class/class_add_student_response.dart';
+import '../models/teacher/class/class_delete_student_request.dart';
+import '../models/teacher/class/class_delete_student_response.dart';
 
 
 class TeacherApiService {
@@ -133,5 +135,18 @@ class TeacherApiService {
 
     final jsonData = json.decode(response.body);
     return ClassAddStudentResponse.fromJson(jsonData);
+  }
+
+  Future<ClassDeleteStudentResponse> deleteStudentFromClass(ClassDeleteStudentRequest request) async {
+    final url = Uri.parse('$_baseUrl/api/class/delete-student?class_id=${request.classId}&student_id=${request.studentId}');
+    final response = await http.delete(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    final jsonData = json.decode(response.body);
+    return ClassDeleteStudentResponse.fromJson(jsonData);
   }
 }
