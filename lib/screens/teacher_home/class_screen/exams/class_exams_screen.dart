@@ -9,7 +9,7 @@ class ClassExamsScreen extends StatefulWidget {
   final int classId;
   final String className;
   final String classHour;
-  final String classRoom; // Add classRoom
+  final String classRoom;
 
   const ClassExamsScreen({super.key, required this.classId, required this.className, required this.classHour, required this.classRoom});
 
@@ -21,7 +21,7 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
   late int classId;
   late String className;
   late String classHour;
-  late String classRoom; // Add classRoom
+  late String classRoom;
   bool isLoading = true;
   List<ExamData> exams = [];
 
@@ -31,7 +31,7 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
     classId = widget.classId;
     className = widget.className;
     classHour = widget.classHour;
-    classRoom = widget.classRoom; // Initialize classRoom
+    classRoom = widget.classRoom;
     initializeDateFormatting('es_ES', null).then((_) {
       retrieveClassExams();
     });
@@ -206,7 +206,7 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
                 classId: classId,
                 className: className,
                 classHour: classHour,
-                classRoom: classRoom, // Pass classRoom
+                classRoom: classRoom,
               ),
             ),
           );
@@ -214,8 +214,8 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
             retrieveClassExams();
           }
         },
-        child: Icon(Icons.add),
         backgroundColor: Colors.blue,
+        child: Icon(Icons.add),
       ),
     );
   }

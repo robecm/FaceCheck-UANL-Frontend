@@ -3,7 +3,8 @@ import '../../../services/teacher_api_service.dart';
 import '../../../models/teacher/retrieve_teacher_classes_response.dart';
 import 'modify_class_screen.dart';
 import 'create_class_screen.dart';
-import 'exams/class_exams_screen.dart'; // Import the ClassExamsScreen
+import 'exams/class_exams_screen.dart';
+import 'class_students_screen.dart'; // Import the ClassStudentsScreen
 
 class TeacherClassesScreen extends StatefulWidget {
   final int teacherId;
@@ -65,8 +66,16 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               leading: Icon(Icons.people),
               title: Text('Ver estudiantes'),
               onTap: () {
-                // TODO Handle 'Ver estudiantes' action
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ClassStudentsScreen(
+                      classId: classInfo.classId,
+                      className: classInfo.className,
+                    ),
+                  ),
+                );
               },
             ),
             ListTile(
