@@ -9,12 +9,13 @@ import '../models/teacher/class/delete_class_response.dart';
 import '../models/teacher/class/exams/retrieve_class_exams_response.dart';
 import '../models/teacher/class/exams/create_class_exam_request.dart';
 import '../models/teacher/class/exams/create_class_exam_response.dart';
+import '../models/teacher/class/exams/update_class_exam_request.dart';
+import '../models/teacher/class/exams/update_class_exam_response.dart';
 import '../models/teacher/class/retrieve_class_students_response.dart';
 import '../models/teacher/class/class_add_student_request.dart';
 import '../models/teacher/class/class_add_student_response.dart';
 import '../models/teacher/class/class_delete_student_request.dart';
 import '../models/teacher/class/class_delete_student_response.dart';
-
 
 class TeacherApiService {
   final String _baseUrl = AppConfig.baseUrl;
@@ -106,6 +107,20 @@ class TeacherApiService {
       final jsonData = json.decode(response.body);
       return CreateClassExamResponse.fromJson(jsonData);
     }
+  }
+
+  Future<UpdateClassExamResponse> updateClassExam(UpdateClassExamRequest request) async {
+    final url = Uri.parse('$_baseUrl/api/exam/update');
+    final response = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(request.toJson()),
+    );
+
+    final jsonData = json.decode(response.body);
+    return UpdateClassExamResponse.fromJson(jsonData);
   }
 
   Future<RetrieveClassStudentsResponse> retrieveClassStudents(String classId) async {

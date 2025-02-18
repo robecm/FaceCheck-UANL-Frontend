@@ -4,6 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import '../../../../services/teacher_api_service.dart';
 import '../../../../models/teacher/class/exams/retrieve_class_exams_response.dart';
 import 'create_class_exam_screen.dart';
+import 'update_class_exam_screen.dart';
 
 class ClassExamsScreen extends StatefulWidget {
   final int classId;
@@ -82,9 +83,27 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
             ListTile(
               leading: Icon(Icons.edit),
               title: Text('Editar examen'),
-              onTap: () {
-                // TODO: Implement edit exam functionality
+              onTap: () async {
                 Navigator.pop(context);
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UpdateClassExamScreen(
+                      classId: classId,
+                      className: className,
+                      classHour: classHour,
+                      classRoom: classRoom,
+                      examId: exam.examId,
+                      examName: exam.examName,
+                      examDate: exam.date,
+                      examHour: exam.hour,
+                      examRoom: exam.classRoom,
+                    ),
+                  ),
+                );
+                if (result == true) {
+                  retrieveClassExams();
+                }
               },
             ),
             ListTile(

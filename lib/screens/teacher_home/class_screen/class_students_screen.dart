@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../services/teacher_api_service.dart';
 import '../../../models/teacher/class/retrieve_class_students_response.dart';
 import '../../../models/teacher/class/class_add_student_request.dart';
-import '../../../models/teacher/class/class_add_student_response.dart';
 import '../../../models/teacher/class/class_delete_student_request.dart';
-import '../../../models/teacher/class/class_delete_student_response.dart';
 
 class ClassStudentsScreen extends StatefulWidget {
   final int classId;
