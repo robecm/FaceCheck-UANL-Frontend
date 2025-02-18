@@ -54,6 +54,57 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
     }
   }
 
+  Future<void> _confirmDeleteExam(BuildContext context, ExamData exam) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmar eliminación'),
+          content: Text('¿Estás seguro de que deseas eliminar el examen "${exam.examName}"?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await _deleteExam(exam.examId);
+    }
+  }
+
+  Future<void> _deleteExam(int examId) async {
+    try {
+      final apiService = TeacherApiService();
+      final response = await apiService.deleteClassExam(examId.toString());
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Examen eliminado correctamente')),
+        );
+        retrieveClassExams();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al eliminar examen: ${response.error}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
   void _showExamOptions(BuildContext context, ExamData exam) {
     showModalBottomSheet(
       context: context,
@@ -110,8 +161,8 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
               leading: Icon(Icons.delete),
               title: Text('Eliminar examen'),
               onTap: () {
-                // TODO: Implement delete exam functionality
                 Navigator.pop(context);
+                _confirmDeleteExam(context, exam);
               },
             ),
           ],
