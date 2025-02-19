@@ -135,6 +135,7 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
                     builder: (context) => ExamResultsScreen(
                       examId: exam.examId,
                       examName: exam.examName,
+                      classId: classId,
                     ),
                   ),
                 );
