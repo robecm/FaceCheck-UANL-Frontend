@@ -17,6 +17,7 @@ import '../models/teacher/class/class_add_student_response.dart';
 import '../models/teacher/class/class_delete_student_request.dart';
 import '../models/teacher/class/class_delete_student_response.dart';
 import '../models/teacher/class/exams/delete_class_exam_response.dart';
+import '../models/teacher/class/exams/retrieve_exam_results_response.dart';
 
 class TeacherApiService {
   final String _baseUrl = AppConfig.baseUrl;
@@ -177,5 +178,18 @@ class TeacherApiService {
 
     final jsonData = json.decode(response.body);
     return DeleteClassExamResponse.fromJson(jsonData);
+  }
+  
+  Future<RetrieveExamResultsResponse> retrieveExamResults(String examId) async {
+    final url = Uri.parse('$_baseUrl/api/exam/results?exam_id=$examId');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    final jsonData = json.decode(response.body);
+    return RetrieveExamResultsResponse.fromJson(jsonData);
   }
 }

@@ -5,6 +5,7 @@ import '../../../../services/teacher_api_service.dart';
 import '../../../../models/teacher/class/exams/retrieve_class_exams_response.dart';
 import 'create_class_exam_screen.dart';
 import 'update_class_exam_screen.dart';
+import 'exam_results_screen.dart';
 
 class ClassExamsScreen extends StatefulWidget {
   final int classId;
@@ -127,8 +128,16 @@ class ClassExamsScreenState extends State<ClassExamsScreen> {
               leading: Icon(Icons.assessment),
               title: Text('Resultados de examen'),
               onTap: () {
-                // TODO: Implement exam results functionality
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ExamResultsScreen(
+                      examId: exam.examId,
+                      examName: exam.examName,
+                    ),
+                  ),
+                );
               },
             ),
             ListTile(
