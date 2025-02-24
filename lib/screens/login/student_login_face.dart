@@ -34,7 +34,7 @@ class StudentLoginFaceScreenState extends State<StudentLoginFaceScreen> {
     try {
       cameras = await availableCameras();
       final frontCamera = cameras!.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.front,
+            (camera) => camera.lensDirection == CameraLensDirection.front,
         orElse: () => throw StateError('No front camera found'),
       );
 
@@ -118,27 +118,45 @@ class StudentLoginFaceScreenState extends State<StudentLoginFaceScreen> {
           Expanded(
             child: Center(
               child: _isCameraInitialized
-                  ? Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: AspectRatio(
-                        aspectRatio: 9 / 16,
-                        child: CameraPreview(_controller!),
+                  ? Builder(
+                builder: (context) {
+                  final previewSize = _controller!.value.previewSize!;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: RotatedBox(
+                      quarterTurns: 1,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: previewSize.width,
+                          height: previewSize.height,
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+                            child: CameraPreview(_controller!),
+                          ),
+                        ),
                       ),
-                    )
+                    ),
+                  );
+                },
+              )
                   : const CircularProgressIndicator(),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: _isLoading
-                ? CircularProgressIndicator()
+                ? const CircularProgressIndicator()
                 : FloatingActionButton(
-                    onPressed: _captureAndVerifyFace,
-                    child: const Icon(Icons.camera),
-                  ),
+              onPressed: _captureAndVerifyFace,
+              child: const Icon(Icons.camera),
+            ),
           ),
         ],
       ),
     );
   }
 }
+
+ // TODO Redirect to student home screen if face is verified

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'screens/animation/splash_screen.dart';
 import 'screens/login/login_selection.dart';
 import 'screens/login/student_login_screen.dart';
@@ -7,9 +8,14 @@ import 'screens/signup/student_signup_screen.dart';
 import 'screens/signup/student_signup_face.dart';
 import 'screens/student_home/student_home_screen.dart';
 import 'screens/teacher_home/teacher_home_screen.dart';
+import 'camtest.dart';
 
-void main() {
-  debugPrint = (String? message, {int? wrapWidth}) {};
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(MyApp());
 }
 
@@ -20,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/teacher_home',
+      initialRoute: '/camtest',
       routes: {
         '/': (context) => SplashScreen(),
         '/login_selection': (context) => LoginSelectionScreen(),
@@ -39,6 +45,7 @@ class MyApp extends StatelessWidget {
         ),
         '/student_home': (context) => StudentHomeScreen(),
         '/teacher_home': (context) => TeacherHomeScreen(),
+        '/camtest': (context) => CameraScreen(),
       },
     );
   }
