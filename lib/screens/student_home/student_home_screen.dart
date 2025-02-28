@@ -3,6 +3,7 @@ import '../../models/session/session_manager.dart';
 import 'student_classes_screen.dart';
 import 'student_teachers_screen.dart';
 import 'student_exams_screen.dart';
+import '../user_info/user_info_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -49,8 +50,16 @@ class StudentHomeScreenState extends State<StudentHomeScreen> {
               leading: Icon(Icons.person),
               title: Text('Mi perfil'),
               onTap: () {
-                print('Selected: Mi perfil');
-                Navigator.pop(context);
+                Navigator.pop(context); // Close the drawer first
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserInfoScreen(
+                      userId: studentId,
+                      userType: 'student',
+                    ),
+                  ),
+                );
               },
             ),
             ListTile(
