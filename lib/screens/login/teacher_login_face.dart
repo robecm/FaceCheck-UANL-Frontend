@@ -1,16 +1,20 @@
 import 'dart:convert';
-import 'dart:io' if (dart.library.html) 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:image/image.dart' as img;
 import '../../services/user_api_service.dart';
 import '../../models/face/verify_face_response.dart';
+import '../../screens/teacher_home/teacher_home_screen.dart';
+import '../../models/session/session_manager.dart';
 
 class TeacherLoginFaceScreen extends StatefulWidget {
   final String faceCode;
+  final int teacherId;
 
   const TeacherLoginFaceScreen({
     super.key,
     required this.faceCode,
+    required this.teacherId,
   });
 
   @override
@@ -64,17 +68,33 @@ class TeacherLoginFaceScreenState extends State<TeacherLoginFaceScreen> {
       try {
         final XFile image = await _controller!.takePicture();
         final bytes = await image.readAsBytes();
-        final base64String = base64Encode(bytes);
 
-        print('Registered base64 (first 100 chars): ${widget.faceCode.substring(0, 100)}');
-        print('Captured base64 (first 100 chars): ${base64String.substring(0, 100)}');
+        final originalImage = img.decodeImage(bytes);
+        if (originalImage == null) {
+          throw Exception('No se puedo decodificar la imagen');
+        }
+        img.Image transformedImage = img.copyRotate(originalImage, angle: 0);
+        transformedImage = img.flipHorizontal(transformedImage);
+
+        final transformedBytes = img.encodeJpg(transformedImage);
+        final base64String = base64Encode(transformedBytes);
+
+        debugPrint('Registered base64 (first 100 chars): ${widget.faceCode.substring(0, 100)}');
+        debugPrint('Captured base64 (first 100 chars): ${base64String.substring(0, 100)}');
 
         VerifyFaceResponse response = await apiService.verifyFace(base64String, widget.faceCode);
 
         if (response.success) {
           final match = response.match;
           if (match == true) {
-            Navigator.pushReplacementNamed(context, '/home');
+            // Set the session teacherId
+            SessionManager().teacherId = widget.teacherId;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TeacherHomeScreen(),
+              ),
+            );
           } else if (match == 'VALUE ERROR') {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('No se detectó una cara en la foto proporcionada')),
@@ -157,5 +177,3 @@ class TeacherLoginFaceScreenState extends State<TeacherLoginFaceScreen> {
     );
   }
 }
-
- // TODO Redirect to teacher home screen if face is verified

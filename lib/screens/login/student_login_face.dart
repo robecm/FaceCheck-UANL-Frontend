@@ -1,16 +1,20 @@
 import 'dart:convert';
-import 'dart:io' if (dart.library.html) 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:image/image.dart' as img;
 import '../../services/user_api_service.dart';
 import '../../models/face/verify_face_response.dart';
+import '../../screens/student_home/student_home_screen.dart';
+import '../../models/session/session_manager.dart';
 
 class StudentLoginFaceScreen extends StatefulWidget {
   final String faceCode;
+  final int studentId;
 
   const StudentLoginFaceScreen({
     super.key,
     required this.faceCode,
+    required this.studentId,
   });
 
   @override
@@ -34,7 +38,7 @@ class StudentLoginFaceScreenState extends State<StudentLoginFaceScreen> {
     try {
       cameras = await availableCameras();
       final frontCamera = cameras!.firstWhere(
-            (camera) => camera.lensDirection == CameraLensDirection.front,
+        (camera) => camera.lensDirection == CameraLensDirection.front,
         orElse: () => throw StateError('No front camera found'),
       );
 
@@ -64,9 +68,17 @@ class StudentLoginFaceScreenState extends State<StudentLoginFaceScreen> {
       try {
         final XFile image = await _controller!.takePicture();
         final bytes = await image.readAsBytes();
-        final base64String = base64Encode(bytes);
 
-        // Print the first 100 characters of the base64 strings
+        final originalImage = img.decodeImage(bytes);
+        if (originalImage == null) {
+          throw Exception('No se pudo decodificar la imagen');
+        }
+        img.Image transformedImage = img.copyRotate(originalImage, angle: 0);
+        transformedImage = img.flipHorizontal(transformedImage);
+
+        final transformedBytes = img.encodeJpg(transformedImage);
+        final base64String = base64Encode(transformedBytes);
+
         print('Registered base64 (first 100 chars): ${widget.faceCode.substring(0, 100)}');
         print('Captured base64 (first 100 chars): ${base64String.substring(0, 100)}');
 
@@ -75,7 +87,14 @@ class StudentLoginFaceScreenState extends State<StudentLoginFaceScreen> {
         if (response.success) {
           final match = response.match;
           if (match == true) {
-            Navigator.pushReplacementNamed(context, '/home');
+            // Set the session studentId
+            SessionManager().studentId = widget.studentId;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const StudentHomeScreen(),
+              ),
+            );
           } else if (match == 'VALUE ERROR') {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('No se detectó una cara en la foto proporcionada')),
@@ -119,28 +138,28 @@ class StudentLoginFaceScreenState extends State<StudentLoginFaceScreen> {
             child: Center(
               child: _isCameraInitialized
                   ? Builder(
-                builder: (context) {
-                  final previewSize = _controller!.value.previewSize!;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: RotatedBox(
-                      quarterTurns: 1,
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: SizedBox(
-                          width: previewSize.width,
-                          height: previewSize.height,
-                          child: Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
-                            child: CameraPreview(_controller!),
+                      builder: (context) {
+                        final previewSize = _controller!.value.previewSize!;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: RotatedBox(
+                            quarterTurns: 1,
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: SizedBox(
+                                width: previewSize.width,
+                                height: previewSize.height,
+                                child: Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+                                  child: CameraPreview(_controller!),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              )
+                        );
+                      },
+                    )
                   : const CircularProgressIndicator(),
             ),
           ),
@@ -149,14 +168,12 @@ class StudentLoginFaceScreenState extends State<StudentLoginFaceScreen> {
             child: _isLoading
                 ? const CircularProgressIndicator()
                 : FloatingActionButton(
-              onPressed: _captureAndVerifyFace,
-              child: const Icon(Icons.camera),
-            ),
+                    onPressed: _captureAndVerifyFace,
+                    child: const Icon(Icons.camera),
+                  ),
           ),
         ],
       ),
     );
   }
 }
-
- // TODO Redirect to student home screen if face is verified

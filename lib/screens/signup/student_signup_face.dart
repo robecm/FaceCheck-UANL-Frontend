@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:io' if (dart.library.html) 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../../services/user_api_service.dart';
+import '../../models/session/session_manager.dart';
+import '../../screens/student_home/student_home_screen.dart';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
 
@@ -167,10 +168,19 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
         );
 
         if (signupResponse.success) {
+
+          final int? studentId = signupResponse.studentId;
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('User registered successfully')),
           );
-          Navigator.pushReplacementNamed(context, '/home');
+          SessionManager().studentId = studentId;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const StudentHomeScreen(),
+            ),
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Registration failed: ${signupResponse.error}')),

@@ -42,7 +42,9 @@ class TeacherLoginScreenState extends State<TeacherLoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => TeacherLoginFaceScreen(faceCode: response.faceImg ?? ''),
+              builder: (context) => TeacherLoginFaceScreen(
+                faceCode: response.faceImg ?? '',
+                teacherId: response.teacherId ?? 0),
             ),
           );
           ScaffoldMessenger.of(context).showSnackBar(
@@ -70,8 +72,8 @@ class TeacherLoginScreenState extends State<TeacherLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(),
-        title: Text('Iniciar sesión'),
+        leading: const BackButton(),
+        title: const Text('Iniciar sesión'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -82,13 +84,13 @@ class TeacherLoginScreenState extends State<TeacherLoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     'Docentes',
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 40),
+                 const SizedBox(height: 40),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Número de empleado'),
+                    decoration: const InputDecoration(labelText: 'Número de empleado'),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -103,9 +105,9 @@ class TeacherLoginScreenState extends State<TeacherLoginScreen> {
                       _worknum = value!;
                     },
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Contraseña'),
+                    decoration: const InputDecoration(labelText: 'Contraseña'),
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -120,12 +122,12 @@ class TeacherLoginScreenState extends State<TeacherLoginScreen> {
                       _password = value!;
                     },
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   isLoading
                       ? CircularProgressIndicator()
                       : ElevatedButton(
                           onPressed: () => _submit('teacher'),
-                          child: Text('Iniciar sesión'),
+                          child: const Text('Iniciar sesión'),
                         ),
                 ],
               ),
