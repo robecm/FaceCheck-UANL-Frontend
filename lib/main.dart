@@ -8,7 +8,6 @@ import 'screens/signup/student_signup_screen.dart';
 import 'screens/signup/student_signup_face.dart';
 import 'screens/student_home/student_home_screen.dart';
 import 'screens/teacher_home/teacher_home_screen.dart';
-import 'camtest.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +44,6 @@ class MyApp extends StatelessWidget {
         ),
         '/student_home': (context) => StudentHomeScreen(),
         '/teacher_home': (context) => TeacherHomeScreen(),
-        '/camtest': (context) => CameraScreen(),
       },
     );
   }

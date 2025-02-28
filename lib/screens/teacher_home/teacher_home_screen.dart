@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'class_screen/teacher_classes_screen.dart';
 import 'exam_screen/teacher_exams_screen.dart';
+import '../user_info/user_info_screen.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
   final int teacherId;
@@ -49,9 +50,16 @@ class TeacherHomeScreenState extends State<TeacherHomeScreen> {
               leading: Icon(Icons.person),
               title: Text('Mi perfil'),
               onTap: () {
-                // Handle menu item selection
-                print('Selected: Mi perfil');
-                Navigator.pop(context);
+                Navigator.pop(context); // Close the drawer first
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserInfoScreen(
+                      userId: teacherId,
+                      userType: 'teacher',
+                    ),
+                  ),
+                );
               },
             ),
             ListTile(
