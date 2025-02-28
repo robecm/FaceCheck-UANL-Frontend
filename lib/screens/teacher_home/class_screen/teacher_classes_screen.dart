@@ -4,7 +4,7 @@ import '../../../models/teacher/retrieve_teacher_classes_response.dart';
 import 'modify_class_screen.dart';
 import 'create_class_screen.dart';
 import 'exams/class_exams_screen.dart';
-import 'class_students_screen.dart'; // Import the ClassStudentsScreen
+import 'class_students_screen.dart';
 
 class TeacherClassesScreen extends StatefulWidget {
   final int teacherId;
@@ -33,7 +33,7 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
       final response = await apiService.retrieveTeacherClasses(teacherId);
       setState(() {
         classes = response.map((data) => ClassData.fromJson(data)).toList();
-        classes.sort((a, b) => a.className.compareTo(b.className)); // Sort classes by name
+        classes.sort((a, b) => a.className.compareTo(b.className));
         isLoading = false;
       });
     } catch (e) {
@@ -51,20 +51,20 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
         return Wrap(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0), // Reduced bottom padding
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
               child: Text(
                 classInfo.className,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0,
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
-            Divider(),
+            const Divider(),
             ListTile(
-              leading: Icon(Icons.people),
-              title: Text('Ver estudiantes'),
+              leading: const Icon(Icons.people),
+              title: const Text('Ver estudiantes'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -79,8 +79,8 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.assignment),
-              title: Text('Ver exámenes'),
+              leading: const Icon(Icons.assignment),
+              title: const Text('Ver exámenes'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -89,16 +89,16 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                     builder: (context) => ClassExamsScreen(
                       classId: classInfo.classId,
                       className: classInfo.className,
-                      classHour: classInfo.startTime, // Pass classHour
-                      classRoom: classInfo.classRoom, // Pass classRoom
+                      classHour: classInfo.startTime,
+                      classRoom: classInfo.classRoom,
                     ),
                   ),
                 );
               },
             ),
             ListTile(
-              leading: Icon(Icons.edit),
-              title: Text('Modificar Clase'),
+              leading: const Icon(Icons.edit),
+              title: const Text('Modificar Clase'),
               onTap: () async {
                 Navigator.pop(context);
                 final result = await Navigator.push(
@@ -108,13 +108,13 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                   ),
                 );
                 if (result == true) {
-                  retrieveTeacherClasses(); // Refresh the data
+                  retrieveTeacherClasses();
                 }
               },
             ),
             ListTile(
-              leading: Icon(Icons.delete),
-              title: Text('Eliminar Clase'),
+              leading: const Icon(Icons.delete),
+              title: const Text('Eliminar Clase'),
               onTap: () {
                 Navigator.pop(context);
                 _confirmDeleteClass(context, classInfo.classId.toString(), classInfo.className);
@@ -131,17 +131,17 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirmar eliminación'),
+          title: const Text('Confirmar eliminación'),
           content: Text('¿Estás seguro de que deseas eliminar la clase "$className"?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancelar'),
+              child: const Text('Cancelar'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Eliminar'),
+              child: const Text('Eliminar'),
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _deleteClass(classId);
@@ -158,13 +158,11 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
       final apiService = TeacherApiService();
       final response = await apiService.deleteClass(classId);
       if (response.success) {
-        retrieveTeacherClasses(); // Refresh the data
+        retrieveTeacherClasses();
       } else {
-        // Handle error
         print('Failed to delete class: ${response.error}');
       }
     } catch (e) {
-      // Handle error
       print('Failed to delete class: $e');
     }
   }
@@ -173,10 +171,10 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Clases'),
+        title: const Text('Clases'),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/teacher_home');
           },
@@ -184,9 +182,9 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
       ),
       body: Center(
         child: isLoading
-            ? CircularProgressIndicator()
+            ? const CircularProgressIndicator()
             : classes.isEmpty
-                ? Text('No tienes clases asignadas actualmente')
+                ? const Text('No tienes clases asignadas actualmente')
                 : ListView.builder(
                     itemCount: classes.length,
                     itemBuilder: (context, index) {
@@ -194,15 +192,15 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                       return GestureDetector(
                         onTap: () => _showClassOptions(context, classInfo),
                         child: Card(
-                          margin: EdgeInsets.all(10),
+                          margin: const EdgeInsets.all(10),
                           child: Padding(
-                            padding: EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(10),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   classInfo.className,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 28.0,
                                     color: Colors.blue,
@@ -211,7 +209,7 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                                 Text.rich(
                                   TextSpan(
                                     children: [
-                                      TextSpan(
+                                      const TextSpan(
                                         text: 'Salón: ',
                                         style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
@@ -222,7 +220,7 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                                 Text.rich(
                                   TextSpan(
                                     children: [
-                                      TextSpan(
+                                      const TextSpan(
                                         text: 'Grupo: ',
                                         style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
@@ -235,13 +233,13 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                                     text: classInfo.startTime == classInfo.endTime
                                         ? '${classInfo.weekDays} ${classInfo.startTime}'
                                         : '${classInfo.weekDays} ${classInfo.startTime} - ${classInfo.endTime}',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 Text.rich(
                                   TextSpan(
                                     children: [
-                                      TextSpan(
+                                      const TextSpan(
                                         text: 'Semestre: ',
                                         style: TextStyle(fontWeight: FontWeight.bold),
                                       ),
@@ -266,10 +264,10 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
             ),
           );
           if (result == true) {
-            retrieveTeacherClasses(); // Refresh the data
+            retrieveTeacherClasses();
           }
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         backgroundColor: Colors.blue,
       ),
     );
