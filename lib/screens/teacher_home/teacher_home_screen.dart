@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'class_screen/teacher_classes_screen.dart';
+import 'exam_screen/teacher_exams_screen.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
   final int teacherId;
 
-  const TeacherHomeScreen({super.key, this.teacherId = 4}); // Default value for debugging
+  const TeacherHomeScreen({super.key, this.teacherId = 124}); // Default value for debugging
 
   @override
   TeacherHomeScreenState createState() => TeacherHomeScreenState();
@@ -82,10 +84,15 @@ class TeacherHomeScreenState extends State<TeacherHomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 360, // Adjust the height as needed
+                  height: 360,
                   child: ElevatedButton(
                     onPressed: () {
-                      print('CLASES button pressed');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TeacherClassesScreen(teacherId: teacherId),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.all(8.0), // Reduce the padding
@@ -117,7 +124,7 @@ class TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 20), // Add some space between the buttons
+              SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: SizedBox(
@@ -125,31 +132,32 @@ class TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   height: 360, // Adjust the height as needed
                   child: ElevatedButton(
                     onPressed: () {
-                      print('ESTUDIANTES button pressed');
+                      print('TAREAS button pressed');
+                      // TODO Implement tareas screen
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(8.0), // Reduce the padding
+                      padding: EdgeInsets.all(8.0),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0), // Adjust the border radius
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end, // Align at the bottom
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Flexible(
                           child: Image.asset(
-                            'assets/images/buttons/student.png', // Local image asset
-                            height: 280, // Limit the image size
+                            'assets/images/buttons/student.png',
+                            height: 280,
                             width: 280,
                           ),
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'ESTUDIANTES',
-                          overflow: TextOverflow.ellipsis, // Handle long text
+                          'TAREAS',
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontWeight: FontWeight.bold, // Make the text bold
-                            fontSize: 24, // Increase the font size
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
                           ),
                         )
                       ],
@@ -157,7 +165,7 @@ class TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 20), // Add some space between the buttons
+              SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: SizedBox(
@@ -165,7 +173,12 @@ class TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   height: 360, // Adjust the height as needed
                   child: ElevatedButton(
                     onPressed: () {
-                      print('EXÁMENES button pressed');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TeacherExamsScreen(teacherId: teacherId),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.all(8.0), // Reduce the padding

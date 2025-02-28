@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/user_api_service.dart';
-import '../../models/login_response.dart';
+import '../../models/login/login_response.dart';
 import 'student_login_face.dart';
 
 class StudentLoginScreen extends StatefulWidget {
@@ -42,7 +42,10 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => StudentLoginFaceScreen(faceCode: response.faceImg ?? ''),
+              builder: (context) => StudentLoginFaceScreen(
+                faceCode: response.faceImg ?? '',
+                studentId: response.studentId ?? 0,
+              ),
             ),
           );
           ScaffoldMessenger.of(context).showSnackBar(
@@ -57,8 +60,6 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
         setState(() {
           isLoading = false;
         });
-
-        print('Error: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al conectar con el servidor: $e')),
         );
@@ -70,8 +71,8 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(),
-        title: Text('Iniciar sesión'),
+        leading: const BackButton(),
+        title: const Text('Iniciar sesión'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -82,13 +83,13 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     'Estudiantes',
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Matrícula'),
+                    decoration: const InputDecoration(labelText: 'Matrícula'),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -103,9 +104,9 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
                       _matnum = value!;
                     },
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Contraseña'),
+                    decoration: const InputDecoration(labelText: 'Contraseña'),
                     obscureText: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -120,18 +121,18 @@ class StudentLoginScreenState extends State<StudentLoginScreen> {
                       _password = value!;
                     },
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   isLoading
-                      ? CircularProgressIndicator()
+                      ? const CircularProgressIndicator()
                       : ElevatedButton(
                           onPressed: () => _submit('student'),
-                          child: Text('Iniciar sesión'),
+                          child: const Text('Iniciar sesión'),
                         ),
                   TextButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/student_signup');
                     },
-                    child: Text('¿No tienes cuenta? Regístrate'),
+                    child: const Text('¿No tienes cuenta? Regístrate'),
                   ),
                 ],
               ),

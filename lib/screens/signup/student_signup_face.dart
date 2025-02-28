@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:io' if (dart.library.html) 'dart:html';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import '../../services/user_api_service.dart';
+import '../../models/session/session_manager.dart';
+import '../../screens/student_home/student_home_screen.dart';
 import 'package:image/image.dart' as img;
 import 'dart:typed_data';
 
@@ -34,7 +35,7 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
   CameraController? _controller;
   List<CameraDescription>? cameras;
   bool _isCameraInitialized = false;
-  bool _isLoading = false; // Add this variable
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -46,7 +47,7 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
     try {
       cameras = await availableCameras();
       final frontCamera = cameras!.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.front,
+            (camera) => camera.lensDirection == CameraLensDirection.front,
         orElse: () => throw StateError('No front camera found'),
       );
 
@@ -110,17 +111,25 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Is this photo okay?'),
-          content: Image.memory(croppedBytes),
+          content: RotatedBox(
+            // Changed quarterTurns to 1 to match the main preview orientation.
+            quarterTurns: 0,
+            child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+              child: Image.memory(croppedBytes),
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 setState(() {
-                  _isLoading = true; // Set loading state to true
+                  _isLoading = true;
                 });
                 await _processPhoto(croppedBytes);
                 setState(() {
-                  _isLoading = false; // Set loading state to false
+                  _isLoading = false;
                 });
               },
               child: const Text('Yes'),
@@ -159,10 +168,19 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
         );
 
         if (signupResponse.success) {
+
+          final int? studentId = signupResponse.studentId;
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('User registered successfully')),
           );
-          Navigator.pushReplacementNamed(context, '/home');
+          SessionManager().studentId = studentId;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const StudentHomeScreen(),
+            ),
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Registration failed: ${signupResponse.error}')),
@@ -204,17 +222,33 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
           Expanded(
             child: Center(
               child: _isCameraInitialized
-                  ? Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: AspectRatio(
-                        aspectRatio: 9 / 16,
-                        child: CameraPreview(_controller!),
+                  ? Builder(
+                builder: (context) {
+                  final previewSize = _controller!.value.previewSize!;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: RotatedBox(
+                      quarterTurns: 1,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: previewSize.width,
+                          height: previewSize.height,
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+                            child: CameraPreview(_controller!),
+                          ),
+                        ),
                       ),
-                    )
+                    ),
+                  );
+                },
+              )
                   : const CircularProgressIndicator(),
             ),
           ),
-          if (_isLoading) // Show loading icon when processing
+          if (_isLoading)
             const CircularProgressIndicator(),
           Padding(
             padding: const EdgeInsets.all(16.0),

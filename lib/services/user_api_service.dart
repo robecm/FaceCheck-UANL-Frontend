@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/signup_response.dart';
-import '../models/login_response.dart';
-import '../models/duplicate_response.dart';
-import '../models/check_face_response.dart';
-import '../models/check_face_request.dart';
-import '../models/verify_face_response.dart';
+import '../models/signup/signup_response.dart';
+import '../models/login/login_response.dart';
+import '../models/signup/duplicate_response.dart';
+import '../models/face/check_face_response.dart';
+import '../models/face/check_face_request.dart';
+import '../models/face/verify_face_response.dart';
 import 'config.dart';
 
 class ApiService {
@@ -40,20 +40,13 @@ class ApiService {
   }
 
   Future<SignupResponse> studentSignup(String name, String username, DateTime birthDate, String faculty, String matnum, String password, String faceImg, String email) async {
-    // Calculate the age
-    final DateTime now = DateTime.now();
-    int age = now.year - birthDate.year;
-    if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
-      age--;
-    }
-
-    final response = await http.post(
+     final response = await http.post(
       Uri.parse('$_baseUrl/api/signup/student'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'name': name,
         'username': username,
-        'age': age, // Include the age instead of birthDate
+        'birthdate': birthDate.toIso8601String(),
         'faculty': faculty,
         'matnum': matnum,
         'password': password,
