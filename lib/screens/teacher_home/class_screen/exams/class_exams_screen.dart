@@ -13,7 +13,9 @@ class ClassExamsScreen extends StatefulWidget {
   final String classHour;
   final String classRoom;
 
-  const ClassExamsScreen({super.key, required this.classId, required this.className, required this.classHour, required this.classRoom});
+  const ClassExamsScreen(
+      {super.key, required this.classId, required this.className,
+        required this.classHour, required this.classRoom});
 
   @override
   ClassExamsScreenState createState() => ClassExamsScreenState();
