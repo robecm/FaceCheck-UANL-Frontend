@@ -4,6 +4,7 @@ import 'student_classes_screen.dart';
 import 'student_teachers_screen.dart';
 import 'student_exams_screen.dart';
 import '../user_info/user_info_screen.dart';
+import 'student_assignments_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -26,31 +27,47 @@ class StudentHomeScreenState extends State<StudentHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Inicio'),
+        title: const Text('Portal Estudiantil'),
         centerTitle: true,
-        automaticallyImplyLeading: true,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Mi Perfil',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserInfoScreen(
+                    userId: studentId,
+                    userType: 'student',
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
+            UserAccountsDrawerHeader(
+              accountName: const Text('Estudiante'),
+              accountEmail: Text('ID: $studentId'),
+              currentAccountPicture: const CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.person, size: 50, color: Colors.blue),
               ),
-              child: Text(
-                'Menú',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
               ),
             ),
             ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Mi perfil'),
+              leading: const Icon(Icons.person),
+              title: const Text('Mi perfil'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer first
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -63,16 +80,17 @@ class StudentHomeScreenState extends State<StudentHomeScreen> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Configuración'),
+              leading: const Icon(Icons.settings),
+              title: const Text('Configuración'),
               onTap: () {
                 print('Selected: Configuración');
                 Navigator.pop(context);
               },
             ),
+            const Divider(),
             ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Cerrar sesión'),
+              leading: const Icon(Icons.logout),
+              title: const Text('Cerrar sesión'),
               onTap: () {
                 print('Selected: Cerrar sesión');
                 Navigator.pop(context);
@@ -81,146 +99,150 @@ class StudentHomeScreenState extends State<StudentHomeScreen> {
           ],
         ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '¡Bienvenido!',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Text(
+                'Accede a tus recursos académicos',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: Column(
+                  children: [
+                    // First row with CLASES and PROFESORES
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildGridItem(
+                              context,
+                              'CLASES',
+                              'assets/images/buttons/class.png',
+                              Colors.blue.shade50,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StudentClassesScreen(studentId: studentId),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: _buildGridItem(
+                              context,
+                              'PROFESORES',
+                              'assets/images/buttons/teacher.png',
+                              Colors.green.shade50,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StudentTeachersScreen(studentId: studentId),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Second row with EXÁMENES and TAREAS
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildGridItem(
+                              context,
+                              'EXÁMENES',
+                              'assets/images/buttons/exam.png',
+                              Colors.red.shade50,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StudentExamsScreen(studentId: studentId),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: _buildGridItem(
+                              context,
+                              'TAREAS',
+                              'assets/images/buttons/assignments.png',
+                              Colors.amber.shade50,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StudentAssignmentsScreen(studentId: studentId),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridItem(
+    BuildContext context,
+    String title,
+    String imagePath,
+    Color backgroundColor,
+    VoidCallback onTap,
+  ) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 360,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StudentClassesScreen(studentId: studentId),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(8.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: Image.asset(
-                            'assets/images/buttons/class.png',
-                            height: 280,
-                            width: 280,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'CLASES',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
+              Expanded(
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.contain,
                 ),
               ),
-              SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 360,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StudentTeachersScreen(studentId: studentId),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(8.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: Image.asset(
-                            'assets/images/buttons/teacher.png',
-                            height: 280,
-                            width: 280,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'PROFESORES',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
+                textAlign: TextAlign.center,
               ),
-              SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 360,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StudentExamsScreen(studentId: studentId),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(8.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: Image.asset(
-                            'assets/images/buttons/exam.png',
-                            height: 280,
-                            width: 280,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'EXÁMENES',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
             ],
           ),
         ),
