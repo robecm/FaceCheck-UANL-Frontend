@@ -1,34 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
-class TeacherAssignmentData {
-  final int id;
-  final String title;
-  final String className;
-  final String description;
-  final String dueDate;
-  final int classId;
-  final int submissionCount;
-  final int totalStudents;
-  final int gradedCount;
-
-  TeacherAssignmentData({
-    required this.id,
-    required this.title,
-    required this.className,
-    required this.description,
-    required this.dueDate,
-    required this.classId,
-    required this.submissionCount,
-    required this.totalStudents,
-    required this.gradedCount,
-  });
-
-  bool isDueDatePassed() {
-    final due = DateFormat('yyyy-MM-dd').parse(dueDate);
-    return due.isBefore(DateTime.now());
-  }
-}
+import '../../../services/teacher_api_service.dart';
+import '../../../models/teacher/retrieve_teacher_assignments_response.dart';
 
 class TeacherAssignmentsScreen extends StatefulWidget {
   final int teacherId;
@@ -42,68 +14,51 @@ class TeacherAssignmentsScreen extends StatefulWidget {
 class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
   late int teacherId;
   bool isLoading = true;
+  bool hasError = false;
+  String errorMessage = '';
   List<TeacherAssignmentData> assignments = [];
+  final TeacherApiService _apiService = TeacherApiService();
 
   @override
   void initState() {
     super.initState();
     teacherId = widget.teacherId;
-    // Simulate API call
-    Future.delayed(Duration(seconds: 1), () {
-      loadMockData();
-      setState(() {
-        isLoading = false;
-      });
-    });
+    _fetchAssignments();
   }
 
-  void loadMockData() {
-    assignments = [
-      TeacherAssignmentData(
-        id: 1,
-        title: 'Investigación sobre Algoritmos',
-        className: 'Programación Avanzada',
-        description: 'Realizar una investigación detallada sobre algoritmos de ordenamiento y su complejidad.',
-        dueDate: '2023-12-01', // Past date
-        classId: 101,
-        submissionCount: 18,
-        totalStudents: 25,
-        gradedCount: 15,
-      ),
-      TeacherAssignmentData(
-        id: 2,
-        title: 'Ejercicios de Ecuaciones',
-        className: 'Matemáticas 101',
-        description: 'Resolver los ejercicios 1-10 del capítulo 3.',
-        dueDate: '2023-12-15', // Past date
-        classId: 102,
-        submissionCount: 22,
-        totalStudents: 30,
-        gradedCount: 0,
-      ),
-      TeacherAssignmentData(
-        id: 3,
-        title: 'Ensayo de Literatura',
-        className: 'Literatura Contemporánea',
-        description: 'Escribir un ensayo sobre Gabriel García Márquez y su impacto en la literatura latinoamericana.',
-        dueDate: '2024-01-20', // Future date
-        classId: 103,
-        submissionCount: 5,
-        totalStudents: 28,
-        gradedCount: 0,
-      ),
-      TeacherAssignmentData(
-        id: 4,
-        title: 'Proyecto Final',
-        className: 'Bases de Datos',
-        description: 'Diseñar e implementar una base de datos para un sistema escolar. Incluir diagrama ER y scripts SQL.',
-        dueDate: '2024-01-15', // Future date
-        classId: 104,
-        submissionCount: 0,
-        totalStudents: 22,
-        gradedCount: 0,
-      ),
-    ];
+  Future<void> _fetchAssignments() async {
+    setState(() {
+      isLoading = true;
+      hasError = false;
+    });
+
+    try {
+      final response = await _apiService.retrieveTeacherAssignments(teacherId);
+
+      if (response.success && response.data != null) {
+        final List<TeacherAssignmentData> fetchedAssignments = response.data!.map((assignment) {
+          // Use the utility method from AssignmentData
+          return assignment.toTeacherAssignmentData();
+        }).toList();
+
+        setState(() {
+          assignments = fetchedAssignments;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          hasError = true;
+          errorMessage = response.error ?? 'Failed to load assignments';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        hasError = true;
+        errorMessage = 'An error occurred: $e';
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -112,108 +67,15 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
       appBar: AppBar(
         title: Text('Gestión de Tareas'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _fetchAssignments,
+            tooltip: 'Refrescar',
+          ),
+        ],
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : assignments.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.assignment_outlined, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text(
-                        'No has creado tareas aún',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8),
-                      Text('Pulsa el botón + para crear una nueva tarea'),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: assignments.length,
-                  padding: EdgeInsets.only(bottom: 80), // Add padding for FAB
-                  itemBuilder: (context, index) {
-                    final assignment = assignments[index];
-                    final bool isPastDue = assignment.isDueDatePassed();
-
-                    // Set card color based on submission and grading status
-                    Color cardColor;
-                    if (isPastDue && assignment.submissionCount == 0) {
-                      cardColor = Colors.red.shade50; // Past due with no submissions
-                    } else if (assignment.submissionCount > 0 && assignment.gradedCount < assignment.submissionCount) {
-                      cardColor = Colors.orange.shade50; // Has ungraded submissions
-                    } else if (assignment.submissionCount > 0 && assignment.gradedCount == assignment.submissionCount) {
-                      cardColor = Colors.green.shade50; // All submissions graded
-                    } else {
-                      cardColor = Colors.blue.shade50; // Active assignment
-                    }
-
-                    return Card(
-                      margin: EdgeInsets.all(10),
-                      color: cardColor,
-                      child: InkWell(
-                        onTap: () {
-                          _showAssignmentOptions(assignment);
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      assignment.title,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  ),
-                                  _buildStatusChip(assignment, isPastDue),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Clase: ${assignment.className}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Fecha de entrega: ${assignment.dueDate}',
-                                style: TextStyle(
-                                  color: isPastDue ? Colors.red : Colors.black87,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              _buildProgressIndicator(assignment),
-                              SizedBox(height: 4),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Entregas: ${assignment.submissionCount}/${assignment.totalStudents}',
-                                    style: TextStyle(fontSize: 13),
-                                  ),
-                                  Text(
-                                    'Calificados: ${assignment.gradedCount}/${assignment.submissionCount}',
-                                    style: TextStyle(fontSize: 13),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+      body: _buildBody(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           _showCreateAssignmentDialog();
@@ -222,6 +84,137 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
         icon: Icon(Icons.add),
         backgroundColor: Colors.blue,
       ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red),
+            SizedBox(height: 16),
+            Text(
+              'Error al cargar las tareas',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(errorMessage),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _fetchAssignments,
+              child: Text('Reintentar'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (assignments.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.assignment_outlined, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              'No has creado tareas aún',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('Pulsa el botón + para crear una nueva tarea'),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: assignments.length,
+      padding: EdgeInsets.only(bottom: 80), // Add padding for FAB
+      itemBuilder: (context, index) {
+        final assignment = assignments[index];
+        final bool isPastDue = assignment.isDueDatePassed();
+
+        // Set card color based on submission and grading status
+        Color cardColor;
+        if (isPastDue && assignment.submissionCount == 0) {
+          cardColor = Colors.red.shade50; // Past due with no submissions
+        } else if (assignment.submissionCount > 0 && assignment.gradedCount < assignment.submissionCount) {
+          cardColor = Colors.orange.shade50; // Has ungraded submissions
+        } else if (assignment.submissionCount > 0 && assignment.gradedCount == assignment.submissionCount) {
+          cardColor = Colors.green.shade50; // All submissions graded
+        } else {
+          cardColor = Colors.blue.shade50; // Active assignment
+        }
+
+        return Card(
+          margin: EdgeInsets.all(10),
+          color: cardColor,
+          child: InkWell(
+            onTap: () {
+              _showAssignmentOptions(assignment);
+            },
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          assignment.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                      _buildStatusChip(assignment, isPastDue),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Clase: ${assignment.className}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Fecha de entrega: ${assignment.dueDate}',
+                    style: TextStyle(
+                      color: isPastDue ? Colors.red : Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  _buildProgressIndicator(assignment),
+                  SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Entregas: ${assignment.submissionCount}/${assignment.totalStudents}',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      Text(
+                        'Calificados: ${assignment.gradedCount}/${assignment.submissionCount}',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

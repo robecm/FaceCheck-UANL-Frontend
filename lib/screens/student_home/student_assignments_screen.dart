@@ -1,32 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
-class AssignmentData {
-  final int id;
-  final String title;
-  final String className;
-  final String description;
-  final String dueDate;
-  final String teacherName;
-  final bool hasEvidence;
-  final double? score;
-
-  AssignmentData({
-    required this.id,
-    required this.title,
-    required this.className,
-    required this.description,
-    required this.dueDate,
-    required this.teacherName,
-    required this.hasEvidence,
-    this.score,
-  });
-
-  bool isDueDatePassed() {
-    final due = DateFormat('yyyy-MM-dd').parse(dueDate);
-    return due.isBefore(DateTime.now());
-  }
-}
+import '../../services/student_api_service.dart';
+import '../../models/student/retrieve_student_assignments_response.dart';
 
 class StudentAssignmentsScreen extends StatefulWidget {
   final int studentId;
@@ -40,64 +14,50 @@ class StudentAssignmentsScreen extends StatefulWidget {
 class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
   late int studentId;
   bool isLoading = true;
-  List<AssignmentData> assignments = [];
+  bool hasError = false;
+  String errorMessage = '';
+  List<StudentAssignmentData> assignments = [];
+  final StudentApiService _apiService = StudentApiService();
 
   @override
   void initState() {
     super.initState();
     studentId = widget.studentId;
-    // Simulate API call
-    Future.delayed(Duration(seconds: 1), () {
-      loadMockData();
-      setState(() {
-        isLoading = false;
-      });
-    });
+    _fetchAssignments();
   }
 
-  void loadMockData() {
-    assignments = [
-      AssignmentData(
-        id: 1,
-        title: 'Investigación sobre Algoritmos',
-        className: 'Programación',
-        description: 'Realizar una investigación sobre algoritmos de ordenamiento.',
-        dueDate: '2023-12-01', // Past date
-        teacherName: 'Prof. García',
-        hasEvidence: true,
-        score: 85,
-      ),
-      AssignmentData(
-        id: 2,
-        title: 'Ejercicios de Ecuaciones',
-        className: 'Matemáticas',
-        description: 'Resolver los ejercicios 1-10 del capítulo 3.',
-        dueDate: '2023-12-15', // Past date
-        teacherName: 'Prof. Martínez',
-        hasEvidence: true,
-        score: null, // Not graded yet
-      ),
-      AssignmentData(
-        id: 3,
-        title: 'Ensayo de Literatura',
-        className: 'Literatura',
-        description: 'Escribir un ensayo sobre Gabriel García Márquez.',
-        dueDate: '2024-01-20', // Future date
-        teacherName: 'Prof. López',
-        hasEvidence: false,
-        score: null,
-      ),
-      AssignmentData(
-        id: 4,
-        title: 'Proyecto Final',
-        className: 'Bases de Datos',
-        description: 'Diseñar e implementar una base de datos para un sistema escolar.',
-        dueDate: '2024-01-15', // Future date
-        teacherName: 'Prof. Rodríguez',
-        hasEvidence: false,
-        score: null,
-      ),
-    ];
+  Future<void> _fetchAssignments() async {
+    setState(() {
+      isLoading = true;
+      hasError = false;
+    });
+
+    try {
+      final response = await _apiService.retrieveStudentAssignments(studentId);
+
+      if (response.success && response.data != null) {
+        final List<StudentAssignmentData> fetchedAssignments = response.data!.map((assignment) {
+          return assignment.toStudentAssignmentData();
+        }).toList();
+
+        setState(() {
+          assignments = fetchedAssignments;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          hasError = true;
+          errorMessage = response.error ?? 'Failed to load assignments';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        hasError = true;
+        errorMessage = 'An error occurred: $e';
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -106,111 +66,123 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
       appBar: AppBar(
         title: Text('Mis Tareas'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _fetchAssignments,
+          ),
+        ],
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : assignments.isEmpty
-              ? Center(child: Text('No tienes tareas asignadas actualmente'))
-              : ListView.builder(
-                  itemCount: assignments.length,
-                  itemBuilder: (context, index) {
-                    final assignment = assignments[index];
-                    final bool isPastDue = assignment.isDueDatePassed();
-
-                    // Set card color based on status
-                    Color cardColor;
-                    if (isPastDue && !assignment.hasEvidence) {
-                      cardColor = Colors.red.shade50; // Overdue without evidence
-                    } else if (isPastDue && assignment.hasEvidence) {
-                      cardColor = Colors.orange.shade50; // Submitted late
-                    } else if (!isPastDue && assignment.hasEvidence) {
-                      cardColor = Colors.green.shade50; // Submitted on time
-                    } else {
-                      cardColor = Colors.blue.shade50; // Pending
-                    }
-
-                    return Card(
-                      margin: EdgeInsets.all(10),
-                      color: cardColor,
-                      child: InkWell(
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (context) => _buildAssignmentDetail(assignment),
-                          );
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      assignment.title,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  ),
-                                  _buildStatusChip(assignment, isPastDue),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Clase: ${assignment.className}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Fecha de entrega: ${assignment.dueDate}',
-                                style: TextStyle(
-                                  color: isPastDue ? Colors.red : Colors.black87,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text('Profesor: ${assignment.teacherName}'),
-                                  if (assignment.score != null)
-                                    Text(
-                                      'Calificación: ${assignment.score}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.deepPurple,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+      body: _buildBody(),
     );
   }
 
-  Widget _buildStatusChip(AssignmentData assignment, bool isPastDue) {
+  Widget _buildBody() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(errorMessage, style: TextStyle(color: Colors.red)),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _fetchAssignments,
+              child: Text('Intentar nuevamente'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (assignments.isEmpty) {
+      return Center(child: Text('No tienes tareas asignadas actualmente'));
+    }
+
+    return ListView.builder(
+      itemCount: assignments.length,
+      itemBuilder: (context, index) {
+        final assignment = assignments[index];
+        final bool isPastDue = assignment.isDueDatePassed();
+
+        // Set card color based on status
+        Color cardColor;
+        if (isPastDue && !assignment.submitted) {
+          cardColor = Colors.red.shade50; // Overdue without submission
+        } else if (isPastDue && assignment.submitted) {
+          cardColor = Colors.orange.shade50; // Submitted
+        } else if (!isPastDue && assignment.submitted) {
+          cardColor = Colors.green.shade50; // Submitted on time
+        } else {
+          cardColor = Colors.blue.shade50; // Pending
+        }
+
+        return Card(
+          margin: EdgeInsets.all(10),
+          color: cardColor,
+          child: InkWell(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (context) => _buildAssignmentDetail(assignment),
+              );
+            },
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          assignment.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                      _buildStatusChip(assignment, isPastDue),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Clase: ${assignment.className}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Fecha de entrega: ${assignment.dueDate}',
+                    style: TextStyle(
+                      color: isPastDue ? Colors.red : Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text('Profesor: ${assignment.teacherName}'),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStatusChip(StudentAssignmentData assignment, bool isPastDue) {
     String label;
     Color color;
 
-    if (assignment.hasEvidence) {
-      if (assignment.score != null) {
-        label = 'Calificado';
-        color = Colors.green;
-      } else {
-        label = 'Entregado';
-        color = Colors.blue;
-      }
+    if (assignment.submitted) {
+      label = 'Entregado';
+      color = Colors.blue;
     } else {
       if (isPastDue) {
         label = 'Vencido';
@@ -235,7 +207,7 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
     );
   }
 
-  Widget _buildAssignmentDetail(AssignmentData assignment) {
+  Widget _buildAssignmentDetail(StudentAssignmentData assignment) {
     final bool isPastDue = assignment.isDueDatePassed();
 
     return Container(
@@ -283,42 +255,14 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
             isPastDue ? Colors.red : null,
           ),
           SizedBox(height: 8),
-          _buildEvidenceSection(assignment),
+          _buildSubmissionSection(assignment),
           SizedBox(height: 16),
-          if (assignment.score != null)
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Calificación:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    '${assignment.score}',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          SizedBox(height: 16),
-          if (!assignment.hasEvidence || (assignment.hasEvidence && !isPastDue))
+          if (!assignment.submitted || (assignment.submitted && !isPastDue))
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 icon: Icon(Icons.upload_file),
-                label: Text(assignment.hasEvidence ? 'Reemplazar evidencia' : 'Subir evidencia'),
+                label: Text(assignment.submitted ? 'Reemplazar evidencia' : 'Subir evidencia'),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 12),
                 ),
@@ -359,8 +303,8 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
     );
   }
 
-  Widget _buildEvidenceSection(AssignmentData assignment) {
-    if (!assignment.hasEvidence) {
+  Widget _buildSubmissionSection(StudentAssignmentData assignment) {
+    if (!assignment.submitted) {
       return Container(
         width: double.infinity,
         padding: EdgeInsets.all(12),
@@ -400,8 +344,6 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
           ),
           SizedBox(height: 8),
           Text('archivo_tarea_${assignment.id}.pdf', style: TextStyle(color: Colors.blue)),
-          SizedBox(height: 4),
-          Text('Subido el 2023-11-30', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );

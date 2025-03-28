@@ -20,6 +20,7 @@ import '../models/teacher/class/exams/delete_class_exam_response.dart';
 import '../models/teacher/class/exams/retrieve_exam_results_response.dart';
 import '../models/teacher/class/exams/modify_exam_results_request.dart';
 import '../models/teacher/class/exams/modify_exam_results_response.dart';
+import '../models/teacher/retrieve_teacher_assignments_response.dart';
 
 class TeacherApiService {
   final String _baseUrl = AppConfig.baseUrl;
@@ -207,5 +208,15 @@ class TeacherApiService {
 
     final jsonData = json.decode(response.body);
     return ModifyExamResultsResponse.fromJson(jsonData);
+  }
+
+  Future<RetrieveTeacherAssignmentsResponse> retrieveTeacherAssignments(int teacherId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/teacher/assignments?teacher_id=$teacherId'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    final jsonData = json.decode(response.body);
+    return RetrieveTeacherAssignmentsResponse.fromJson(jsonData);
   }
 }
