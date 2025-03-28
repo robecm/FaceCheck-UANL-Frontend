@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../services/teacher_api_service.dart';
 import '../../../models/teacher/retrieve_teacher_assignments_response.dart';
+import 'modify_assignment_screen.dart';
+import 'create_assignment_screen.dart';
 
 class TeacherAssignmentsScreen extends StatefulWidget {
   final int teacherId;
@@ -421,9 +423,17 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
   }
 
   void _editAssignment(TeacherAssignmentData assignment) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Editar tarea (a implementar)')),
-    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ModifyAssignmentScreen(assignment: assignment),
+      ),
+    ).then((result) {
+      if (result == true) {
+        // Refresh assignments if changes were made
+        _fetchAssignments();
+      }
+    });
   }
 
   void _confirmDeleteAssignment(TeacherAssignmentData assignment) {
@@ -452,29 +462,16 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
   }
 
   void _showCreateAssignmentDialog() {
-    // This would typically navigate to a form screen
-    // For now we'll just show a placeholder dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Crear Nueva Tarea'),
-        content: Text('Aquí irá un formulario para crear una nueva tarea (a implementar)'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Creación de tarea (a implementar)')),
-              );
-            },
-            child: Text('Crear'),
-          ),
-        ],
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CreateAssignmentScreen(teacherId: teacherId),
       ),
-    );
+    ).then((result) {
+      if (result == true) {
+        // Refresh assignments if a new assignment was created
+        _fetchAssignments();
+      }
+    });
   }
 }
