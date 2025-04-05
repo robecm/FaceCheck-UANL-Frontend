@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:io';
 import '../../services/student_api_service.dart';
 import '../../models/student/retrieve_student_assignments_response.dart';
+import '../../widgets/file_upload/evidence_uploader.dart';
+import 'package:file_picker/file_picker.dart';
 
 class StudentAssignmentsScreen extends StatefulWidget {
   final int studentId;
@@ -18,6 +22,8 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
   String errorMessage = '';
   List<StudentAssignmentData> assignments = [];
   final StudentApiService _apiService = StudentApiService();
+  String? evidenceFileName;
+  String? evidenceBase64;
 
   @override
   void initState() {
@@ -210,6 +216,10 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
   Widget _buildAssignmentDetail(StudentAssignmentData assignment) {
     final bool isPastDue = assignment.isDueDatePassed();
 
+    // Reset evidence data when opening a new detail view
+    evidenceFileName = assignment.submitted ? "Evidencia actual.pdf" : null;
+    evidenceBase64 = null;
+
     return Container(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -254,23 +264,134 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
             assignment.dueDate,
             isPastDue ? Colors.red : null,
           ),
-          SizedBox(height: 8),
-          _buildSubmissionSection(assignment),
           SizedBox(height: 16),
-          if (!assignment.submitted || (assignment.submitted && !isPastDue))
+
+          // File selection section
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Evidencia de Entrega',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 12),
+              if (evidenceFileName != null)
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.description, color: Colors.blue),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          evidenceFileName!,
+                          style: TextStyle(color: Colors.blue.shade700),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () {
+                          setState(() {
+                            evidenceFileName = null;
+                            evidenceBase64 = null;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.file_upload_outlined, color: Colors.grey),
+                      SizedBox(width: 8),
+                      Text('No se ha seleccionado ningún archivo'),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+
+          SizedBox(height: 16),
+          if (!isPastDue || assignment.submitted)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                icon: Icon(Icons.upload_file),
-                label: Text(assignment.submitted ? 'Reemplazar evidencia' : 'Subir evidencia'),
+                icon: Icon(evidenceFileName == null ? Icons.upload_file : Icons.check),
+                label: Text(evidenceFileName == null
+                    ? 'Seleccionar archivo'
+                    : (assignment.submitted ? 'Actualizar entrega' : 'Entregar tarea')),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 12),
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
                 ),
-                onPressed: () {
-                  // Future upload implementation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Funcionalidad de carga en desarrollo')),
-                  );
+                onPressed: () async {
+                  // TODO - Implement file upload logic
+                  if (evidenceFileName == null) {
+                    try {
+                      // Use simpler file picker configuration
+                      FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+                      if (result != null) {
+                        File file = File(result.files.single.path!);
+
+                        // Check file size - limit to 20 MB
+                        int fileSizeInBytes = await file.length();
+                        double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+
+                        if (fileSizeInMB > 20) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('El archivo es demasiado grande. El tamaño máximo es 20 MB.')),
+                          );
+                          return;
+                        }
+
+                        print("Converting file to base64: ${result.files.single.name} (${fileSizeInMB.toStringAsFixed(2)} MB)");
+                        try {
+                          List<int> fileBytes = await file.readAsBytes();
+                          String base64Data = base64Encode(fileBytes);
+                          print("File conversion complete: ${DateTime.now()}");
+
+                          setState(() {
+                            evidenceFileName = result.files.single.name;
+                            evidenceBase64 = base64Data;
+                          });
+                        } catch (e) {
+                          print("Base64 conversion error: $e");
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error al convertir el archivo a base64')),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      print("File picker error: $e");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error al seleccionar archivo')),
+                      );
+                    }
+                  } else {
+                    // Show success message and close modal
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Evidencia registrada correctamente')),
+                    );
+                    Navigator.pop(context);
+                  }
                 },
               ),
             ),
@@ -298,52 +419,6 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
               style: TextStyle(color: valueColor),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubmissionSection(StudentAssignmentData assignment) {
-    if (!assignment.submitted) {
-      return Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.orange.shade50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.info_outline, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('No se ha subido evidencia para esta tarea.'),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(width: 8),
-              Text(
-                'Evidencia subida',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Text('archivo_tarea_${assignment.id}.pdf', style: TextStyle(color: Colors.blue)),
         ],
       ),
     );
