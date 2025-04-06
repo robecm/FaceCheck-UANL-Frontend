@@ -135,6 +135,29 @@ class StudentAssignmentData {
     required this.submitted,
   });
 
+  // Add copyWith method for updating assignment data
+  StudentAssignmentData copyWith({
+    int? id,
+    String? title,
+    String? description,
+    String? dueDate,
+    String? className,
+    int? classId,
+    String? teacherName,
+    bool? submitted,
+  }) {
+    return StudentAssignmentData(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      dueDate: dueDate ?? this.dueDate,
+      className: className ?? this.className,
+      classId: classId ?? this.classId,
+      teacherName: teacherName ?? this.teacherName,
+      submitted: submitted ?? this.submitted,
+    );
+  }
+
   bool isDueDatePassed() {
     try {
       // Try multiple date formats to handle different API responses

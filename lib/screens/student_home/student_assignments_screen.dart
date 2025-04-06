@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import '../../services/student_api_service.dart';
 import '../../models/student/retrieve_student_assignments_response.dart';
-import '../../widgets/file_upload/evidence_uploader.dart';
 import 'package:file_picker/file_picker.dart';
 
 class StudentAssignmentsScreen extends StatefulWidget {
@@ -17,7 +16,7 @@ class StudentAssignmentsScreen extends StatefulWidget {
 
 class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
   late int studentId;
-  bool isLoading = true;
+  bool isLoading = false;
   bool hasError = false;
   String errorMessage = '';
   List<StudentAssignmentData> assignments = [];
@@ -216,9 +215,10 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
   Widget _buildAssignmentDetail(StudentAssignmentData assignment) {
     final bool isPastDue = assignment.isDueDatePassed();
 
-    // Reset evidence data when opening a new detail view
-    evidenceFileName = assignment.submitted ? "Evidencia actual.pdf" : null;
-    evidenceBase64 = null;
+    // Only initialize if not already set, don't reset on every rebuild
+    if (evidenceFileName == null) {
+      evidenceFileName = assignment.submitted ? "Evidencia actual.pdf" : null;
+    }
 
     return Container(
       padding: EdgeInsets.all(16),
@@ -303,6 +303,13 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
                             evidenceFileName = null;
                             evidenceBase64 = null;
                           });
+                          // Re-open the modal to update UI
+                          Navigator.pop(context);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (context) => _buildAssignmentDetail(assignment),
+                          );
                         },
                       ),
                     ],
@@ -331,69 +338,130 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
           if (!isPastDue || assignment.submitted)
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: Icon(evidenceFileName == null ? Icons.upload_file : Icons.check),
-                label: Text(evidenceFileName == null
-                    ? 'Seleccionar archivo'
-                    : (assignment.submitted ? 'Actualizar entrega' : 'Entregar tarea')),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () async {
-                  // TODO - Implement file upload logic
-                  if (evidenceFileName == null) {
-                    try {
-                      // Use simpler file picker configuration
-                      FilePickerResult? result = await FilePicker.platform.pickFiles();
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : ElevatedButton.icon(
+                      icon: Icon(evidenceFileName == null ? Icons.upload_file : Icons.check),
+                      label: Text(evidenceFileName == null
+                          ? 'Seleccionar archivo'
+                          : (assignment.submitted ? 'Actualizar entrega' : 'Entregar tarea')),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () async {
+                        if (evidenceFileName == null) {
+                          try {
+                            // File selection code
+                            FilePickerResult? result = await FilePicker.platform.pickFiles();
 
-                      if (result != null) {
-                        File file = File(result.files.single.path!);
+                            if (result != null) {
+                              File file = File(result.files.single.path!);
 
-                        // Check file size - limit to 20 MB
-                        int fileSizeInBytes = await file.length();
-                        double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+                              // Check file size - limit to 20 MB
+                              int fileSizeInBytes = await file.length();
+                              double fileSizeInMB = fileSizeInBytes / (1024 * 1024);
 
-                        if (fileSizeInMB > 20) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('El archivo es demasiado grande. El tamaño máximo es 20 MB.')),
-                          );
-                          return;
+                              if (fileSizeInMB > 20) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('El archivo es demasiado grande. El tamaño máximo es 20 MB.')),
+                                );
+                                return;
+                              }
+
+                              print("Converting file to base64: ${result.files.single.name} (${fileSizeInMB.toStringAsFixed(2)} MB)");
+
+                              try {
+                                List<int> fileBytes = await file.readAsBytes();
+                                String base64Data = base64Encode(fileBytes);
+                                print("File conversion complete: ${DateTime.now()}");
+
+                                // Store the data
+                                setState(() {
+                                  evidenceFileName = result.files.single.name;
+                                  evidenceBase64 = base64Data;
+                                });
+                                print("UI variables updated - filename: $evidenceFileName");
+
+                                // Force rebuild of bottom sheet to show selected file
+                                Navigator.pop(context);
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  builder: (context) => _buildAssignmentDetail(assignment),
+                                );
+                              } catch (e) {
+                                print("Base64 conversion error: $e");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error al convertir el archivo a base64')),
+                                );
+                              }
+                            }
+                          } catch (e) {
+                            print("File picker error: $e");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error al seleccionar archivo')),
+                            );
+                          }
+                        } else {
+                          // Upload evidence
+                          try {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            print("Starting upload of file: $evidenceFileName");
+
+                            final response = await _apiService.uploadAssignmentEvidence(
+                              assignmentId: assignment.id,
+                              studentId: widget.studentId,
+                              classId: assignment.classId,
+                              fileName: evidenceFileName!,
+                              base64FileData: evidenceBase64!,
+                            );
+
+                            setState(() {
+                              isLoading = false;
+                            });
+
+                            if (response.success) {
+                              print("Upload successful, updating local state");
+
+                              // Update assignment status locally
+                              setState(() {
+                                final int index = assignments.indexWhere((a) => a.id == assignment.id);
+                                if (index != -1) {
+                                  assignments[index] = assignments[index].copyWith(submitted: true);
+                                }
+                              });
+
+                              // Close the modal and show success message
+                              Navigator.pop(context);
+
+                              // Refresh assignments from server to ensure UI is up-to-date
+                              _fetchAssignments();
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Evidencia registrada correctamente')),
+                              );
+                            } else {
+                              print("Upload failed: ${response.error}");
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: ${response.error ?? "No se pudo subir la evidencia"}')),
+                              );
+                            }
+                          } catch (e) {
+                            print("Upload exception: $e");
+                            setState(() {
+                              isLoading = false;
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error al subir la evidencia: $e')),
+                            );
+                          }
                         }
-
-                        print("Converting file to base64: ${result.files.single.name} (${fileSizeInMB.toStringAsFixed(2)} MB)");
-                        try {
-                          List<int> fileBytes = await file.readAsBytes();
-                          String base64Data = base64Encode(fileBytes);
-                          print("File conversion complete: ${DateTime.now()}");
-
-                          setState(() {
-                            evidenceFileName = result.files.single.name;
-                            evidenceBase64 = base64Data;
-                          });
-                        } catch (e) {
-                          print("Base64 conversion error: $e");
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error al convertir el archivo a base64')),
-                          );
-                        }
-                      }
-                    } catch (e) {
-                      print("File picker error: $e");
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error al seleccionar archivo')),
-                      );
-                    }
-                  } else {
-                    // Show success message and close modal
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Evidencia registrada correctamente')),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
-              ),
+                      },
+                    ),
             ),
         ],
       ),
