@@ -61,6 +61,7 @@ class StudentApiService {
     return RetrieveStudentAssignmentsResponse.fromJson(jsonData);
   }
 
+  // lib/services/student_api_service.dart - update the uploadAssignmentEvidence method
   Future<UploadAssignmentEvidenceResponse> uploadAssignmentEvidence({
     required int assignmentId,
     required int studentId,
@@ -72,12 +73,23 @@ class StudentApiService {
     final url = Uri.parse('$_baseUrl$endpoint');
 
     try {
+      // Extract file extension from the fileName
+      String fileExtension = '';
+      if (fileName.contains('.')) {
+        fileExtension = fileName.split('.').last.toLowerCase();
+      } else {
+        // If we have base64 data but no extension in the filename,
+        // we could potentially decode and detect the type
+        // For now, leave empty and let server handle it
+      }
+
       final request = UploadAssignmentEvidenceRequest(
         assignmentId: assignmentId,
         studentId: studentId,
         classId: classId,
         fileName: fileName,
         fileData: base64FileData,
+        fileExtension: fileExtension,
       );
 
       final response = await http.post(

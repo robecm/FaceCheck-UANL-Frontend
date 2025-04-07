@@ -4,6 +4,7 @@ class UploadAssignmentEvidenceRequest {
   final int classId;
   final String fileData;
   final String fileName;
+  final String fileExtension;  // New field
 
   UploadAssignmentEvidenceRequest({
     required this.assignmentId,
@@ -11,6 +12,7 @@ class UploadAssignmentEvidenceRequest {
     required this.classId,
     required this.fileData,
     required this.fileName,
+    required this.fileExtension,
   });
 
   Map<String, dynamic> toJson() {
@@ -20,6 +22,7 @@ class UploadAssignmentEvidenceRequest {
       'class_id': classId.toString(),
       'file_data': fileData,
       'file_name': fileName,
+      'file_extension': fileExtension,
     };
   }
 }

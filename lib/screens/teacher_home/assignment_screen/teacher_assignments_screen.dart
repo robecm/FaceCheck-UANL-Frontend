@@ -3,6 +3,7 @@ import '../../../services/teacher_api_service.dart';
 import '../../../models/teacher/retrieve_teacher_assignments_response.dart';
 import 'modify_assignment_screen.dart';
 import 'create_assignment_screen.dart';
+import 'assignment_submissions_screen.dart';
 
 class TeacherAssignmentsScreen extends StatefulWidget {
   final int teacherId;
@@ -343,26 +344,14 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
               _buildOptionTile(
                 icon: Icons.assignment_turned_in,
                 title: 'Ver entregas',
-                subtitle: '${assignment.submissionCount} de ${assignment.totalStudents} estudiantes',
                 onTap: () {
                   Navigator.pop(context);
                   _navigateToSubmissions(assignment);
                 },
               ),
               _buildOptionTile(
-                icon: Icons.grading,
-                title: 'Calificar tareas',
-                subtitle: '${assignment.gradedCount} de ${assignment.submissionCount} calificadas',
-                onTap: () {
-                  Navigator.pop(context);
-                  _navigateToGrading(assignment);
-                },
-                enabled: assignment.submissionCount > 0,
-              ),
-              _buildOptionTile(
                 icon: Icons.edit,
                 title: 'Editar tarea',
-                subtitle: 'Modificar detalles de la tarea',
                 onTap: () {
                   Navigator.pop(context);
                   _editAssignment(assignment);
@@ -371,7 +360,6 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
               _buildOptionTile(
                 icon: Icons.delete_outline,
                 title: 'Eliminar tarea',
-                subtitle: 'Esta acción no se puede deshacer',
                 onTap: () {
                   Navigator.pop(context);
                   _confirmDeleteAssignment(assignment);
@@ -388,7 +376,7 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
   Widget _buildOptionTile({
     required IconData icon,
     required String title,
-    required String subtitle,
+    String? subtitle,
     required VoidCallback onTap,
     bool enabled = true,
     bool isDestructive = false,
@@ -404,22 +392,25 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      subtitle: Text(subtitle),
+      subtitle: subtitle != null ? Text(subtitle) : null,  // Show subtitle only if provided
       enabled: enabled,
       onTap: enabled ? onTap : null,
     );
   }
 
   void _navigateToSubmissions(TeacherAssignmentData assignment) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Navegando a ver entregas (a implementar)')),
-    );
-  }
-
-  void _navigateToGrading(TeacherAssignmentData assignment) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Navegando a calificar tareas (a implementar)')),
-    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AssignmentSubmissionsScreen(
+          assignmentId: assignment.id,
+          assignmentTitle: assignment.title,
+        ),
+      ),
+    ).then((_) {
+      // Refresh to update grading statistics
+      _fetchAssignments();
+    });
   }
 
   void _editAssignment(TeacherAssignmentData assignment) {

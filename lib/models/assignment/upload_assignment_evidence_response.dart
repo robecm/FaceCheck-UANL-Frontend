@@ -32,9 +32,13 @@ class UploadAssignmentEvidenceResponse {
 
 class UploadAssignmentEvidenceData {
   final String evidenceId;
+  final String? fileName;
+  final String? fileExtension;
 
   UploadAssignmentEvidenceData({
     required this.evidenceId,
+    this.fileName,
+    this.fileExtension,
   });
 
   factory UploadAssignmentEvidenceData.fromJson(Map<String, dynamic> json) {
@@ -42,12 +46,16 @@ class UploadAssignmentEvidenceData {
     var rawId = json['evidence_id'];
     return UploadAssignmentEvidenceData(
       evidenceId: rawId != null ? rawId.toString() : '',
+      fileName: json['file_name'],
+      fileExtension: json['file_extension'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'evidence_id': evidenceId,
+      'file_name': fileName,
+      'file_extension': fileExtension,
     };
   }
 }

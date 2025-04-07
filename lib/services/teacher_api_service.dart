@@ -21,6 +21,10 @@ import '../models/teacher/class/exams/retrieve_exam_results_response.dart';
 import '../models/teacher/class/exams/modify_exam_results_request.dart';
 import '../models/teacher/class/exams/modify_exam_results_response.dart';
 import '../models/teacher/retrieve_teacher_assignments_response.dart';
+import '../models/assignment/retrieve_assignment_evidences_response.dart';
+import '../models/assignment/grade_assignment_evidence_request.dart';
+import '../models/assignment/grade_assignment_evidence_response.dart';
+
 
 class TeacherApiService {
   final String _baseUrl = AppConfig.baseUrl;
@@ -218,5 +222,61 @@ class TeacherApiService {
 
     final jsonData = json.decode(response.body);
     return RetrieveTeacherAssignmentsResponse.fromJson(jsonData);
+  }
+
+  Future<RetrieveAssignmentEvidencesResponse> retrieveAssignmentEvidences(String assignmentId) async {
+    final url = Uri.parse('$_baseUrl/api/assignment/evidence/list?assignment_id=$assignmentId');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      return RetrieveAssignmentEvidencesResponse.fromJson(jsonDecode(response.body));
+    } catch (e) {
+      return RetrieveAssignmentEvidencesResponse(
+        success: false,
+        statusCode: 500,
+        error: 'Failed to retrieve assignment evidences: $e',
+      );
+    }
+  }
+
+  Future<GradeAssignmentEvidenceResponse> gradeAssignmentEvidence({
+    required String evidenceId,
+    required double grade,
+    String? feedback,
+  }) async {
+    const String endpoint = '/api/assignment/evidence/grade';
+    final url = Uri.parse('$_baseUrl$endpoint');
+
+    try {
+      final request = GradeAssignmentEvidenceRequest(
+        evidenceId: evidenceId,
+        grade: grade,
+        feedback: feedback,
+      );
+
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(request.toJson()),
+      );
+
+      return GradeAssignmentEvidenceResponse.fromJson(jsonDecode(response.body));
+    } catch (e) {
+      return GradeAssignmentEvidenceResponse(
+        success: false,
+        statusCode: 500,
+        error: 'Failed to grade evidence: $e',
+      );
+    }
   }
 }

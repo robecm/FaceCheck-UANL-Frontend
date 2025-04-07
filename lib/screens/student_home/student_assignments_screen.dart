@@ -22,6 +22,7 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
   List<StudentAssignmentData> assignments = [];
   final StudentApiService _apiService = StudentApiService();
   String? evidenceFileName;
+  String? evidenceFileExtension;
   String? evidenceBase64;
 
   @override
@@ -218,6 +219,7 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
     // Only initialize if not already set, don't reset on every rebuild
     if (evidenceFileName == null) {
       evidenceFileName = assignment.submitted ? "Evidencia actual.pdf" : null;
+      evidenceFileExtension = assignment.submitted ? "pdf" : null;
     }
 
     return Container(
@@ -301,6 +303,7 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
                         onPressed: () {
                           setState(() {
                             evidenceFileName = null;
+                            evidenceFileExtension = null;
                             evidenceBase64 = null;
                           });
                           // Re-open the modal to update UI
@@ -358,6 +361,14 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
 
                             if (result != null) {
                               File file = File(result.files.single.path!);
+                              String fileName = result.files.single.name;
+
+                              // Extract file extension
+                              String fileExtension = '';
+                              if (fileName.contains('.')) {
+                                fileExtension = fileName.split('.').last.toLowerCase();
+                              }
+                              // No need for complex file type detection that could cause errors
 
                               // Check file size - limit to 20 MB
                               int fileSizeInBytes = await file.length();
@@ -370,19 +381,20 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
                                 return;
                               }
 
-                              print("Converting file to base64: ${result.files.single.name} (${fileSizeInMB.toStringAsFixed(2)} MB)");
+                              print("Converting file to base64: $fileName (${fileSizeInMB.toStringAsFixed(2)} MB) - Extension: $fileExtension");
 
                               try {
                                 List<int> fileBytes = await file.readAsBytes();
                                 String base64Data = base64Encode(fileBytes);
                                 print("File conversion complete: ${DateTime.now()}");
 
-                                // Store the data
+                                // Store the data with extension
                                 setState(() {
-                                  evidenceFileName = result.files.single.name;
+                                  evidenceFileName = fileName;
+                                  evidenceFileExtension = fileExtension;
                                   evidenceBase64 = base64Data;
                                 });
-                                print("UI variables updated - filename: $evidenceFileName");
+                                print("UI variables updated - filename: $evidenceFileName, extension: $evidenceFileExtension");
 
                                 // Force rebuild of bottom sheet to show selected file
                                 Navigator.pop(context);
@@ -410,7 +422,7 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
                             setState(() {
                               isLoading = true;
                             });
-                            print("Starting upload of file: $evidenceFileName");
+                            print("Starting upload of file: $evidenceFileName (extension: $evidenceFileExtension)");
 
                             final response = await _apiService.uploadAssignmentEvidence(
                               assignmentId: assignment.id,
@@ -462,11 +474,11 @@ class _StudentAssignmentsScreenState extends State<StudentAssignmentsScreen> {
                         }
                       },
                     ),
-            ),
-        ],
-      ),
-    );
-  }
+              ),
+          ],
+        ),
+      );
+    }
 
   Widget _buildDetailRow(String label, String value, [Color? valueColor]) {
     return Padding(
