@@ -8,6 +8,7 @@ import 'screens/signup/student_signup_screen.dart';
 import 'screens/signup/student_signup_face.dart';
 import 'screens/student_home/student_home_screen.dart';
 import 'screens/teacher_home/teacher_home_screen.dart';
+import 'models/session/session_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
   runApp(MyApp());
 }
 
@@ -25,6 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      // Start directly with StudentHomeScreen instead of SplashScreen
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),
@@ -32,7 +35,6 @@ class MyApp extends StatelessWidget {
         '/student_login': (context) => StudentLoginScreen(),
         '/teacher_login': (context) => TeacherLoginScreen(),
         '/student_signup': (context) => StudentSignupScreen(),
-        '/home': (context) => HomeScreen(),
         '/student_face': (context) => StudentFaceScreen(
           name: '',
           username: '',
@@ -49,13 +51,3 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: Text('Bienvenido a la pantalla principal')),
-    );
-  }
-}

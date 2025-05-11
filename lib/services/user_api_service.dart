@@ -39,7 +39,10 @@ class ApiService {
     return LoginResponse.fromJson(jsonData);
   }
 
-  Future<SignupResponse> studentSignup(String name, String username, DateTime birthDate, String faculty, String matnum, String password, String faceImg, String email) async {
+  Future<SignupResponse> studentSignup(
+      String name, String username, DateTime birthDate, String faculty,
+      String matnum, String password, String faceImg, String email
+      ) async {
      final response = await http.post(
       Uri.parse('$_baseUrl/api/signup/student'),
       headers: {'Content-Type': 'application/json'},
