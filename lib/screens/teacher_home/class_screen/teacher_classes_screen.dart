@@ -120,6 +120,62 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                 _confirmDeleteClass(context, classInfo.classId.toString(), classInfo.className);
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.emoji_people),
+              title: const Text('Asistencia'),
+              onTap: () {
+                Navigator.pop(context);
+                _showAttendanceOptions(context, classInfo);
+              }
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAttendanceOptions(BuildContext context, ClassData classInfo) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Wrap(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+              child: Text(
+                'Opciones de Asistencia - ${classInfo.className}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.how_to_reg),
+              title: const Text('Tomar asistencia'),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to take attendance screen
+                // TODO: Replace with actual navigation when the screen is created
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Función de tomar asistencia en desarrollo')),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Revisar asistencia'),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to review attendance screen
+                // TODO: Replace with actual navigation when the screen is created
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Función de revisar asistencia en desarrollo')),
+                );
+              },
+            ),
           ],
         );
       },
