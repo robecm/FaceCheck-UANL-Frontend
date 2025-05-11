@@ -17,8 +17,6 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  SessionManager().studentId = 124;
-
   runApp(MyApp());
 }
 
@@ -30,7 +28,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       // Start directly with StudentHomeScreen instead of SplashScreen
-      initialRoute: '/teacher_home',
+      initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),
         '/login_selection': (context) => LoginSelectionScreen(),
