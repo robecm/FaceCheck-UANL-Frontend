@@ -5,6 +5,7 @@ import 'modify_class_screen.dart';
 import 'create_class_screen.dart';
 import 'exams/class_exams_screen.dart';
 import 'class_students_screen.dart';
+import '../attendance_screen/check_attendance_screen.dart';
 
 class TeacherClassesScreen extends StatefulWidget {
   final int teacherId;
@@ -157,10 +158,14 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               title: const Text('Tomar asistencia'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigate to take attendance screen
-                // TODO: Replace with actual navigation when the screen is created
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Función de tomar asistencia en desarrollo')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CheckAttendanceScreen(
+                      classId: classInfo.classId,
+                      className: classInfo.className,
+                    ),
+                  ),
                 );
               },
             ),
