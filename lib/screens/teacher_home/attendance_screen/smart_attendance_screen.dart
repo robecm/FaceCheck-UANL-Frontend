@@ -508,31 +508,50 @@ class _SmartAttendanceScreenState extends State<SmartAttendanceScreen> {
 
           // Camera preview
           Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(8),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20), // Keep the rounded corners
-                child: Builder(
-                  builder: (context) {
-                    final previewSize = _cameraController.value.previewSize!;
-                    return RotatedBox(
-                      quarterTurns: 1,
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: SizedBox(
-                          width: previewSize.width,
-                          height: previewSize.height,
-                          child: Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
-                            child: CameraPreview(_cameraController),
-                          ),
+                borderRadius: BorderRadius.circular(20),
+                child: _isCameraInitialized
+                    ? Builder(
+                        builder: (context) {
+                          final previewSize = _cameraController.value.previewSize!;
+                          return RotatedBox(
+                            quarterTurns: 1,
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: SizedBox(
+                                width: previewSize.width,
+                                height: previewSize.height,
+                                child: Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+                                  child: CameraPreview(_cameraController),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Iniciando cámara...',
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  },
-                ),
               ),
             ),
           ),

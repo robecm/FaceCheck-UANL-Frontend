@@ -47,7 +47,7 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
     try {
       cameras = await availableCameras();
       final frontCamera = cameras!.firstWhere(
-            (camera) => camera.lensDirection == CameraLensDirection.front,
+        (camera) => camera.lensDirection == CameraLensDirection.front,
         orElse: () => throw StateError('No front camera found'),
       );
 
@@ -110,9 +110,8 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Is this photo okay?'),
+          title: const Text('¿Esta foto es correcta?'),
           content: RotatedBox(
-            // Changed quarterTurns to 1 to match the main preview orientation.
             quarterTurns: 0,
             child: Transform(
               alignment: Alignment.center,
@@ -132,14 +131,14 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
                   _isLoading = false;
                 });
               },
-              child: const Text('Yes'),
+              child: const Text('Sí'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _restartCamera();
               },
-              child: const Text('Retake'),
+              child: const Text('Tomar de nuevo'),
             ),
           ],
         );
@@ -168,11 +167,10 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
         );
 
         if (signupResponse.success) {
-
           final int? studentId = signupResponse.studentId;
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User registered successfully')),
+            const SnackBar(content: Text('Usuario registrado exitosamente')),
           );
           SessionManager().studentId = studentId;
           Navigator.pushReplacement(
@@ -183,18 +181,18 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration failed: ${signupResponse.error}')),
+            SnackBar(content: Text('Registro fallido: ${signupResponse.error}')),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No face detected. Please retake the photo.')),
+          const SnackBar(content: Text('No se detectó un rostro. Por favor, toma otra foto.')),
         );
         _restartCamera();
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Face verification failed. Please retake the photo.')),
+        const SnackBar(content: Text('Verificación facial fallida. Por favor, toma otra foto.')),
       );
       _restartCamera();
     }
@@ -216,48 +214,155 @@ class StudentFaceScreenState extends State<StudentFaceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Camera Preview')),
-      body: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: _isCameraInitialized
-                  ? Builder(
-                builder: (context) {
-                  final previewSize = _controller!.value.previewSize!;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: RotatedBox(
-                      quarterTurns: 1,
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: SizedBox(
-                          width: previewSize.width,
-                          height: previewSize.height,
-                          child: Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
-                            child: CameraPreview(_controller!),
-                          ),
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: const Text('Registro Facial'),
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.green.shade100, Colors.white],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            children: [
+              // Header with instructions
+              Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.green.shade100,
+                        child: Icon(
+                          Icons.face,
+                          size: 28,
+                          color: Colors.green.shade700,
                         ),
                       ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Registro facial',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Coloca tu rostro frente a la cámara y toma una foto para registrarte',
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Camera preview
+              Expanded(
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: _isCameraInitialized
+                      ? Builder(
+                          builder: (context) {
+                            final previewSize = _controller!.value.previewSize!;
+                            return RotatedBox(
+                              quarterTurns: 1,
+                              child: FittedBox(
+                                fit: BoxFit.contain,
+                                child: SizedBox(
+                                  width: previewSize.width,
+                                  height: previewSize.height,
+                                  child: Transform(
+                                    alignment: Alignment.center,
+                                    transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+                                    child: CameraPreview(_controller!),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Iniciando cámara...',
+                                style: TextStyle(
+                                  color: Colors.green.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Capture button
+              SizedBox(
+                width: 180,
+                height: 56,
+                child: _isLoading
+                  ? Card(
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.green.shade600,
+                        ),
+                      ),
+                    )
+                  : ElevatedButton.icon(
+                      onPressed: _isCameraInitialized ? _capturePhoto : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                      ),
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text(
+                        'Tomar foto',
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ),
-                  );
-                },
-              )
-                  : const CircularProgressIndicator(),
-            ),
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
-          if (_isLoading)
-            const CircularProgressIndicator(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: FloatingActionButton(
-              onPressed: _capturePhoto,
-              child: const Icon(Icons.camera),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
