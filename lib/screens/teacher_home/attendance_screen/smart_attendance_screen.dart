@@ -540,16 +540,16 @@ class _SmartAttendanceScreenState extends State<SmartAttendanceScreen> {
           // Status indicator
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              _attempts == 0
-                  ? 'Capture el rostro del estudiante'
-                  : 'Intento ${_attempts}/2',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: _attempts == 0 ? Colors.blue : Colors.orange,
-              ),
-            ),
+            child: _attempts > 0
+                ? Text(
+                    'Intento ${_attempts}/2',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                    ),
+                  )
+                : const SizedBox(), // Empty widget when _attempts is 0
           ),
 
           // Camera controls
