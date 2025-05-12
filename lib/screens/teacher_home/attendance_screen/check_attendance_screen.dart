@@ -19,7 +19,8 @@ class CheckAttendanceScreen extends StatefulWidget {
 class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
   bool isLoading = true;
   List<StudentData> students = [];
-  Map<int, bool> attendanceMap = {}; // Maps student ID to attendance status
+  Map<int, bool> attendanceMap = {};
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -117,6 +118,7 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
     // Store context reference and check if mounted throughout the function
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    final formattedDate = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
 
     // Show loading dialog
     showDialog(
@@ -164,6 +166,7 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
           widget.classId,
           presentStudentIds,
           true,
+          attendanceDate: formattedDate,
         );
 
         if (!presentResponse.success) {
@@ -178,6 +181,7 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
           widget.classId,
           absentStudentIds,
           false,
+          attendanceDate: formattedDate,
         );
 
         if (!absentResponse.success) {
@@ -233,7 +237,27 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
     );
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    // Set last date to the end of next year to allow more flexibility
+    final now = DateTime.now();
+    final lastDate = DateTime(now.year + 1, 12, 31);
 
+    // Make sure initialDate is not after lastDate
+    final initialDate = selectedDate.isAfter(lastDate) ? now : selectedDate;
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2020),
+      lastDate: lastDate,
+    );
+
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -254,11 +278,28 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             alignment: Alignment.center,
-            child: Text(
-              'Fecha: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            child: InkWell(
+              onTap: () => _selectDate(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blue),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.calendar_today, color: Colors.blue),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Fecha: ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
