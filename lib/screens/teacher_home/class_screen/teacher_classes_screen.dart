@@ -5,6 +5,8 @@ import 'modify_class_screen.dart';
 import 'create_class_screen.dart';
 import 'exams/class_exams_screen.dart';
 import 'class_students_screen.dart';
+import '../attendance_screen/check_attendance_screen.dart';
+import '../attendance_screen/review_attendance_screen.dart';
 
 class TeacherClassesScreen extends StatefulWidget {
   final int teacherId;
@@ -64,7 +66,7 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.people),
-              title: const Text('Ver estudiantes'),
+              title: const Text('Estudiantes'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -79,8 +81,16 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               },
             ),
             ListTile(
+                leading: const Icon(Icons.emoji_people),
+                title: const Text('Asistencias'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showAttendanceOptions(context, classInfo);
+                }
+            ),
+            ListTile(
               leading: const Icon(Icons.assignment),
-              title: const Text('Ver exámenes'),
+              title: const Text('Exámenes'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -118,6 +128,62 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               onTap: () {
                 Navigator.pop(context);
                 _confirmDeleteClass(context, classInfo.classId.toString(), classInfo.className);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAttendanceOptions(BuildContext context, ClassData classInfo) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Wrap(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+              child: Text(
+                'Asistencia - ${classInfo.className}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.how_to_reg),
+              title: const Text('Tomar asistencia'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CheckAttendanceScreen(
+                      classId: classInfo.classId,
+                      className: classInfo.className,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Revisar asistencia'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReviewAttendanceScreen(
+                      classId: classInfo.classId,
+                      className: classInfo.className,
+                    ),
+                  ),
+                );
               },
             ),
           ],

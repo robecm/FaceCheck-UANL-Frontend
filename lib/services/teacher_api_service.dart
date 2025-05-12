@@ -24,7 +24,10 @@ import '../models/teacher/retrieve_teacher_assignments_response.dart';
 import '../models/assignment/retrieve_assignment_evidences_response.dart';
 import '../models/assignment/grade_assignment_evidence_request.dart';
 import '../models/assignment/grade_assignment_evidence_response.dart';
-
+import '../models/attendance/modify_attendance_request.dart';
+import '../models/attendance/modify_attendance_response.dart';
+import '../models/attendance/retrieve_class_attendance_request.dart';
+import '../models/attendance/retrieve_class_attendance_response.dart';
 
 class TeacherApiService {
   final String _baseUrl = AppConfig.baseUrl;
@@ -276,6 +279,69 @@ class TeacherApiService {
         success: false,
         statusCode: 500,
         error: 'Failed to grade evidence: $e',
+      );
+    }
+  }
+
+  Future<ModifyAttendanceResponse> modifyAttendance(
+    int classId,
+    List<int> studentIds,
+    bool present,
+    {String? attendanceDate, String? attendanceTime}
+  ) async {
+    final url = Uri.parse('$_baseUrl/api/attendance/modify');
+
+    // If no date is provided, use today's date in YYYY-MM-DD format
+    final date = attendanceDate ??
+        "${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}";
+
+    final request = ModifyAttendanceRequest(
+      classId: classId,
+      studentIds: studentIds,
+      attendanceDate: date,
+      attendanceTime: attendanceTime,
+      present: present,
+    );
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(request.toJson()),
+      );
+
+      return ModifyAttendanceResponse.fromJson(jsonDecode(response.body));
+    } catch (e) {
+      return ModifyAttendanceResponse(
+        success: false,
+        statusCode: 500,
+        error: 'Failed to modify attendance: $e',
+      );
+    }
+  }
+
+  Future<RetrieveClassAttendanceResponse> retrieveClassAttendance(String classId) async {
+    final request = RetrieveClassAttendanceRequest(classId: classId);
+    final queryParams = request.toQueryParameters();
+    final url = Uri.parse('$_baseUrl/api/attendance/class').replace(queryParameters: queryParams);
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
+
+      return RetrieveClassAttendanceResponse.fromJson(jsonDecode(response.body));
+    } catch (e) {
+      return RetrieveClassAttendanceResponse(
+        success: false,
+        statusCode: 500,
+        error: 'Failed to retrieve class attendance: $e',
       );
     }
   }
