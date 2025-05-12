@@ -25,10 +25,10 @@ class LoginSelectionScreen extends StatelessWidget {
                 Center(
                   child: Column(
                     children: [
-                      Icon(
-                        Icons.face_retouching_natural,
-                        size: 70,
-                        color: Colors.blue.shade700,
+                      Image.asset(
+                        'assets/images/app_logo.png',
+                        height: 70,
+                        width: 70,
                       ),
                       const SizedBox(height: 16),
                       Text(
