@@ -17,7 +17,6 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize teacher session with ID 124
   final sessionManager = SessionManager();
   sessionManager.teacherId = 124;
 

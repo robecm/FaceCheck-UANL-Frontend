@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../services/teacher_api_service.dart';
 import '../../../models/teacher/class/retrieve_class_students_response.dart';
+import 'smart_attendance_screen.dart';
 
 class CheckAttendanceScreen extends StatefulWidget {
   final int classId;
@@ -275,9 +276,16 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
   }
 
   void _startSmartAttendance() {
-    // To be implemented later
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Función de asistencia inteligente en desarrollo')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SmartAttendanceScreen(
+          classId: widget.classId,
+          className: widget.className,
+          students: students,
+          selectedDate: selectedDate,
+        ),
+      ),
     );
   }
 

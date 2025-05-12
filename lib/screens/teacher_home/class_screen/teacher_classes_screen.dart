@@ -66,7 +66,7 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.people),
-              title: const Text('Ver estudiantes'),
+              title: const Text('Estudiantes'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -81,8 +81,16 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
               },
             ),
             ListTile(
+                leading: const Icon(Icons.emoji_people),
+                title: const Text('Asistencias'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showAttendanceOptions(context, classInfo);
+                }
+            ),
+            ListTile(
               leading: const Icon(Icons.assignment),
-              title: const Text('Ver exámenes'),
+              title: const Text('Exámenes'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -122,14 +130,6 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
                 _confirmDeleteClass(context, classInfo.classId.toString(), classInfo.className);
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.emoji_people),
-              title: const Text('Asistencia'),
-              onTap: () {
-                Navigator.pop(context);
-                _showAttendanceOptions(context, classInfo);
-              }
-            )
           ],
         );
       },
@@ -145,7 +145,7 @@ class TeacherClassesScreenState extends State<TeacherClassesScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
               child: Text(
-                'Opciones de Asistencia - ${classInfo.className}',
+                'Asistencia - ${classInfo.className}',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0,
