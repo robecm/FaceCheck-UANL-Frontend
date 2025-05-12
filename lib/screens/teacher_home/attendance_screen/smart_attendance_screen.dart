@@ -508,31 +508,50 @@ class _SmartAttendanceScreenState extends State<SmartAttendanceScreen> {
 
           // Camera preview
           Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(8),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20), // Keep the rounded corners
-                child: Builder(
-                  builder: (context) {
-                    final previewSize = _cameraController.value.previewSize!;
-                    return RotatedBox(
-                      quarterTurns: 1,
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: SizedBox(
-                          width: previewSize.width,
-                          height: previewSize.height,
-                          child: Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
-                            child: CameraPreview(_cameraController),
-                          ),
+                borderRadius: BorderRadius.circular(20),
+                child: _isCameraInitialized
+                    ? Builder(
+                        builder: (context) {
+                          final previewSize = _cameraController.value.previewSize!;
+                          return RotatedBox(
+                            quarterTurns: 1,
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: SizedBox(
+                                width: previewSize.width,
+                                height: previewSize.height,
+                                child: Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+                                  child: CameraPreview(_cameraController),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Iniciando cámara...',
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  },
-                ),
               ),
             ),
           ),
@@ -540,16 +559,16 @@ class _SmartAttendanceScreenState extends State<SmartAttendanceScreen> {
           // Status indicator
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              _attempts == 0
-                  ? 'Capture el rostro del estudiante'
-                  : 'Intento ${_attempts}/2',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: _attempts == 0 ? Colors.blue : Colors.orange,
-              ),
-            ),
+            child: _attempts > 0
+                ? Text(
+                    'Intento ${_attempts}/2',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                    ),
+                  )
+                : const SizedBox(), // Empty widget when _attempts is 0
           ),
 
           // Camera controls

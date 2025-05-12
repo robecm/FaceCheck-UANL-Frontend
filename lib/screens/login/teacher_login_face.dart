@@ -97,16 +97,16 @@ class TeacherLoginFaceScreenState extends State<TeacherLoginFaceScreen> {
             );
           } else if (match == 'VALUE ERROR') {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('No se detectó una cara en la foto proporcionada')),
+              const SnackBar(content: Text('No se detectó una cara en la foto proporcionada')),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('La cara registrada no coincide con la proporcionada')),
+              const SnackBar(content: Text('La cara registrada no coincide con la proporcionada')),
             );
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error en la verificación de la cara')),
+            const SnackBar(content: Text('Error en la verificación de la cara')),
           );
         }
       } catch (e) {
@@ -131,48 +131,155 @@ class TeacherLoginFaceScreenState extends State<TeacherLoginFaceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Camera Preview')),
-      body: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: _isCameraInitialized
-                  ? Builder(
-                      builder: (context) {
-                        final previewSize = _controller!.value.previewSize!;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: RotatedBox(
-                            quarterTurns: 1,
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              child: SizedBox(
-                                width: previewSize.width,
-                                height: previewSize.height,
-                                child: Transform(
-                                  alignment: Alignment.center,
-                                  transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
-                                  child: CameraPreview(_controller!),
-                                ),
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: const Text('Verificación facial'),
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade100, Colors.white],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            children: [
+              // Header with instructions
+              Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.blue.shade100,
+                        child: Icon(
+                          Icons.face,
+                          size: 28,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Verificación facial',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    )
-                  : const CircularProgressIndicator(),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: _isLoading
-                ? const CircularProgressIndicator()
-                : FloatingActionButton(
-                    onPressed: _captureAndVerifyFace,
-                    child: const Icon(Icons.camera),
+                            SizedBox(height: 4),
+                            Text(
+                              'Coloca tu rostro frente a la cámara y presiona el botón para verificar tu identidad',
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Camera preview
+              Expanded(
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: _isCameraInitialized
+                        ? Builder(
+                            builder: (context) {
+                              final previewSize = _controller!.value.previewSize!;
+                              return RotatedBox(
+                                quarterTurns: 1,
+                                child: FittedBox(
+                                  fit: BoxFit.contain,
+                                  child: SizedBox(
+                                    width: previewSize.width,
+                                    height: previewSize.height,
+                                    child: Transform(
+                                      alignment: Alignment.center,
+                                      transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+                                      child: CameraPreview(_controller!),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        : Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const CircularProgressIndicator(),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Iniciando cámara...',
+                                  style: TextStyle(
+                                    color: Colors.blue.shade700,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Capture button
+              SizedBox(
+                width: 180,
+                height: 56,
+                child: _isLoading
+                    ? Card(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.blue.shade600,
+                          ),
+                        ),
+                      )
+                    : ElevatedButton.icon(
+                        onPressed: _isCameraInitialized ? _captureAndVerifyFace : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                        ),
+                        icon: const Icon(Icons.camera_alt),
+                        label: const Text(
+                          'Verificar',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
