@@ -28,6 +28,7 @@ import '../models/attendance/modify_attendance_request.dart';
 import '../models/attendance/modify_attendance_response.dart';
 import '../models/attendance/retrieve_class_attendance_request.dart';
 import '../models/attendance/retrieve_class_attendance_response.dart';
+import '../models/teacher/retrieve_teacher_exams_response.dart';
 
 class TeacherApiService {
   final String _baseUrl = AppConfig.baseUrl;
@@ -342,6 +343,27 @@ class TeacherApiService {
         success: false,
         statusCode: 500,
         error: 'Failed to retrieve class attendance: $e',
+      );
+    }
+  }
+
+  Future<RetrieveTeacherExamsResponse> retrieveTeacherExams(int teacherId) async {
+    final url = Uri.parse('$_baseUrl/api/teacher/exams?teacher_id=$teacherId');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      final jsonData = json.decode(response.body);
+      return RetrieveTeacherExamsResponse.fromJson(jsonData);
+    } catch (e) {
+      return RetrieveTeacherExamsResponse(
+        success: false,
+        error: 'Failed to retrieve teacher exams: $e',
+        statusCode: 500,
       );
     }
   }

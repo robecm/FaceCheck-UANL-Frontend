@@ -4,6 +4,7 @@ import '../../../models/teacher/retrieve_teacher_assignments_response.dart';
 import 'modify_assignment_screen.dart';
 import 'create_assignment_screen.dart';
 import 'assignment_submissions_screen.dart';
+import 'package:intl/intl.dart';
 
 class TeacherAssignmentsScreen extends StatefulWidget {
   final int teacherId;
@@ -61,6 +62,16 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
         errorMessage = 'An error occurred: $e';
         isLoading = false;
       });
+    }
+  }
+
+  String _formatDueDate(String dateStr) {
+    try {
+      final DateTime parsedDate = DateFormat("EEE, dd MMM yyyy HH:mm:ss").parse(dateStr, true);
+      return DateFormat("dd/MM/yyyy, HH:mm").format(parsedDate.toLocal());
+    } catch (e) {
+      // In case of parsing error, return original string
+      return dateStr;
     }
   }
 
@@ -191,26 +202,10 @@ class _TeacherAssignmentsScreenState extends State<TeacherAssignmentsScreen> {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Fecha de entrega: ${assignment.dueDate}',
+                    'Fecha de entrega: ${_formatDueDate(assignment.dueDate)}',
                     style: TextStyle(
                       color: isPastDue ? Colors.red : Colors.black87,
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  _buildProgressIndicator(assignment),
-                  SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Entregas: ${assignment.submissionCount}/${assignment.totalStudents}',
-                        style: TextStyle(fontSize: 13),
-                      ),
-                      Text(
-                        'Calificados: ${assignment.gradedCount}/${assignment.submissionCount}',
-                        style: TextStyle(fontSize: 13),
-                      ),
-                    ],
                   ),
                 ],
               ),
