@@ -275,8 +275,8 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
     }
   }
 
-  void _startSmartAttendance() {
-    Navigator.push(
+  void _startSmartAttendance() async {
+    final result = await Navigator.push<Map<int, bool>>(
       context,
       MaterialPageRoute(
         builder: (context) => SmartAttendanceScreen(
@@ -287,6 +287,13 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
         ),
       ),
     );
+
+    // Update attendance map with results from smart attendance
+    if (result != null) {
+      setState(() {
+        attendanceMap = Map<int, bool>.from(result);
+      });
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {

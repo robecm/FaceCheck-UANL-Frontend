@@ -384,8 +384,8 @@ class _SmartAttendanceScreenState extends State<SmartAttendanceScreen> {
             ),
           );
 
-          // Return to previous screen
-          Navigator.pop(context);
+          // Return to previous screen with attendance data
+          Navigator.pop(context, attendanceMap);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -694,7 +694,7 @@ class _SmartAttendanceScreenState extends State<SmartAttendanceScreen> {
               const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context, attendanceMap);
                 },
                 child: const Text(
                   'Cancelar',
