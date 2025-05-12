@@ -29,6 +29,10 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
   }
 
   Future<void> retrieveClassStudents() async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final apiService = TeacherApiService();
       final response = await apiService.retrieveClassStudents(widget.classId.toString());
@@ -38,7 +42,7 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
         final sortedStudents = response.data!..sort((a, b) =>
             int.parse(a.matnum).compareTo(int.parse(b.matnum)));
 
-        // Initialize attendance map with all students marked present by default
+        // Initialize attendance map with all students marked absent by default
         final initialAttendance = {
           for (var student in sortedStudents) student.id: false,
         };
@@ -46,8 +50,10 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
         setState(() {
           students = sortedStudents;
           attendanceMap = initialAttendance;
-          isLoading = false;
         });
+
+        // After getting students, fetch existing attendance data for the selected date
+        await fetchAttendanceForDate();
       } else {
         setState(() {
           students = [];
@@ -56,6 +62,44 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
       }
     } catch (e) {
       debugPrint('Failed to load students: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> fetchAttendanceForDate() async {
+    try {
+      final apiService = TeacherApiService();
+      final attendanceResponse = await apiService.retrieveClassAttendance(widget.classId.toString());
+
+      if (attendanceResponse.success && attendanceResponse.data != null) {
+        // Format selected date for comparison
+        final formattedSelectedDate = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+
+        // Filter attendance records for the selected date and update the attendance map
+        final attendanceForDate = attendanceResponse.data!
+            .where((record) => record.date == formattedSelectedDate)
+            .toList();
+
+        // Create a new map to update attendance status based on retrieved records
+        final updatedAttendanceMap = Map<int, bool>.from(attendanceMap);
+
+        for (var record in attendanceForDate) {
+          updatedAttendanceMap[record.studentId] = record.present;
+        }
+
+        setState(() {
+          attendanceMap = updatedAttendanceMap;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Failed to load attendance data: $e');
       setState(() {
         isLoading = false;
       });
@@ -256,6 +300,9 @@ class _CheckAttendanceScreenState extends State<CheckAttendanceScreen> {
       setState(() {
         selectedDate = picked;
       });
+
+      // Fetch attendance data for the newly selected date
+      await fetchAttendanceForDate();
     }
   }
 
